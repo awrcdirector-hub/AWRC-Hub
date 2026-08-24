@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#f7f8f5" />
+    <title>AWRC Hub</title>
+    <meta
+      name="description"
+      content="A clean launch page for AWRC Logbook, Video Library, and Signup."
+    />
+    <link rel="manifest" href="./manifest.webmanifest" />
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <main class="hub" aria-label="AWRC Hub">
+      <a
+        class="club-mark"
+        href="#"
+        aria-label="AWRC Hub Google Sheet link pending"
+      >
+        <img
+          src="https://awrc-logbook.onrender.com/assets/awrc-logo.png"
+          alt="AWRC"
+          decoding="async"
+        />
+      </a>
+
+      <nav class="app-grid" aria-label="AWRC apps">
+        <a class="app-link" href="https://awrc-logbook.onrender.com/">
+          <span class="app-icon image-icon" aria-hidden="true">
+            <img src="./logbook-icon-v9.png" alt="" decoding="async" />
+          </span>
+          <span class="app-name">Logbook</span>
+        </a>
+
+        <a class="app-link" href="#" aria-disabled="true">
+          <span class="app-icon video" aria-hidden="true">
+            <span class="screen"></span>
+            <span class="play"></span>
+          </span>
+          <span class="app-name">Video Library</span>
+        </a>
+
+        <a class="app-link" href="#" aria-disabled="true">
+          <span class="app-icon signup" aria-hidden="true">
+            <span class="clipboard"></span>
+            <span class="check"></span>
+          </span>
+          <span class="app-name">Signup</span>
+        </a>
+      </nav>
+    </main>
+  </body>
+</html>
