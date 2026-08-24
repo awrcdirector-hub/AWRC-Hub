@@ -7,12 +7,12 @@
   "theme_color": "#f7f8f5",
   "icons": [
     {
-      "src": "https://awrc-logbook.onrender.com/assets/awrc-logo.png",
+      "src": "./awrc-hub-icon.png",
       "sizes": "192x192",
       "type": "image/png"
     },
     {
-      "src": "https://awrc-logbook.onrender.com/assets/awrc-logo.png",
+      "src": "./awrc-hub-icon.png",
       "sizes": "512x512",
       "type": "image/png"
     }
