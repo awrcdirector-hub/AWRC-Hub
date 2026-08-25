@@ -17,8 +17,12 @@ const memberAddName = document.querySelector("#hubMemberAddName");
 const memberRemoveForm = document.querySelector("#hubMemberRemoveForm");
 const memberRemoveName = document.querySelector("#hubMemberRemoveName");
 
+function savedNotificationName() {
+  return localStorage.getItem(HUB_NOTIFY_NAME_KEY) || "";
+}
+
 if (nameInput) {
-  nameInput.value = localStorage.getItem(HUB_NOTIFY_NAME_KEY) || "";
+  nameInput.value = savedNotificationName();
 }
 
 function setEnabledButton(userName) {
@@ -30,6 +34,13 @@ function setEnabledButton(userName) {
 
 if (nameInput?.value) {
   setEnabledButton(nameInput.value);
+}
+
+function syncEnabledButtonToName() {
+  const selectedName = registeredName(nameInput?.value);
+  const savedName = savedNotificationName();
+  const stillEnabled = selectedName && savedName && selectedName.toLowerCase() === savedName.toLowerCase();
+  setEnabledButton(stillEnabled ? selectedName : "");
 }
 
 function setStatus(message, kind = "neutral") {
@@ -223,6 +234,8 @@ async function removeMember(event) {
 }
 
 form?.addEventListener("submit", enableHubNotifications);
+nameInput?.addEventListener("input", syncEnabledButtonToName);
+nameInput?.addEventListener("change", syncEnabledButtonToName);
 adminLogin?.addEventListener("submit", unlockAdmin);
 memberAddForm?.addEventListener("submit", addMember);
 memberRemoveForm?.addEventListener("submit", removeMember);
