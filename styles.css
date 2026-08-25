@@ -1,3 +1,5 @@
+@import url("https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800;900&display=swap");
+
 :root {
   color-scheme: light;
   --ink: #17211d;
@@ -9,9 +11,7 @@
   --blue: #2369a1;
   --red: #b43d30;
   --gold: #d69a2d;
-  font-family:
-    Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
-    sans-serif;
+  font-family: "Nunito", Arial, Helvetica, sans-serif;
 }
 
 * {
@@ -25,6 +25,11 @@ body {
   background:
     radial-gradient(circle at 50% 0%, rgba(17, 95, 70, 0.08), transparent 34rem),
     linear-gradient(180deg, #ffffff 0%, var(--page) 58%, #eef2ee 100%);
+}
+
+button,
+input {
+  font: inherit;
 }
 
 .hub {
@@ -113,15 +118,51 @@ body {
   align-items: start;
 }
 
-.notify-panel {
-  width: min(100%, 640px);
+.utility-panel {
+  width: min(100%, 610px);
   display: grid;
-  gap: 18px;
-  padding: 18px;
-  border: 1px solid var(--line);
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.notify-panel,
+.admin-panel {
+  min-width: 0;
+  border: 1px solid rgba(216, 222, 217, 0.82);
   border-radius: 8px;
-  background: rgba(255, 255, 255, 0.76);
-  box-shadow: 0 14px 34px rgba(23, 33, 29, 0.08);
+  background: rgba(255, 255, 255, 0.54);
+  overflow: hidden;
+}
+
+.notify-panel summary,
+.admin-panel summary {
+  min-height: 38px;
+  display: flex;
+  align-items: center;
+  padding: 0 13px;
+  color: var(--muted);
+  font-size: 0.84rem;
+  font-weight: 850;
+  cursor: pointer;
+  list-style: none;
+}
+
+.notify-panel summary::-webkit-details-marker,
+.admin-panel summary::-webkit-details-marker {
+  display: none;
+}
+
+.notify-panel summary::after,
+.admin-panel summary::after {
+  content: "+";
+  margin-left: auto;
+  color: var(--green);
+  font-weight: 900;
+}
+
+.notify-panel[open] summary::after,
+.admin-panel[open] summary::after {
+  content: "-";
 }
 
 .eyebrow {
@@ -132,26 +173,17 @@ body {
   letter-spacing: 0;
 }
 
-.notify-panel h1 {
-  margin: 0;
-  color: var(--ink);
-  font-size: clamp(1.38rem, 4vw, 2.05rem);
-  font-weight: 900;
-  line-height: 1.05;
-  letter-spacing: 0;
-}
-
-.notify-copy,
 .notify-status {
-  margin: 8px 0 0;
+  margin: 4px 13px 13px;
   color: var(--muted);
-  font-size: 0.95rem;
+  font-size: 0.82rem;
   line-height: 1.35;
 }
 
 .notify-form {
   display: grid;
   gap: 8px;
+  padding: 0 13px 13px;
 }
 
 .notify-form label {
@@ -168,7 +200,7 @@ body {
 
 .notify-row input,
 .notify-row button {
-  min-height: 46px;
+  min-height: 40px;
   border-radius: 8px;
   font: inherit;
 }
@@ -186,8 +218,29 @@ body {
   padding: 0 16px;
   color: #ffffff;
   background: var(--green);
-  font-weight: 850;
+  font-weight: 900;
   cursor: pointer;
+}
+
+.admin-login {
+  display: grid;
+  gap: 8px;
+  padding: 0 13px 13px;
+}
+
+.admin-login label {
+  color: var(--ink);
+  font-size: 0.8rem;
+  font-weight: 800;
+}
+
+.admin-tools {
+  display: grid;
+  gap: 10px;
+}
+
+.admin-tools[hidden] {
+  display: none;
 }
 
 .notify-row button:disabled {
@@ -322,6 +375,10 @@ body {
 
   .app-icon {
     border-radius: 18px;
+  }
+
+  .utility-panel {
+    grid-template-columns: 1fr;
   }
 
   .notify-row {

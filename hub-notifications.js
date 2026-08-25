@@ -1,9 +1,21 @@
 const HUB_NOTIFY_NAME_KEY = "awrc-hub-notify-name";
 
+let members = [];
+let adminPassword = "";
+
 const form = document.querySelector("#hubNotifyForm");
 const nameInput = document.querySelector("#hubNotifyName");
+const memberOptions = document.querySelector("#memberOptions");
 const statusText = document.querySelector("#hubNotifyStatus");
 const enableButton = document.querySelector("#hubEnableNotifications");
+const adminLogin = document.querySelector("#hubAdminLogin");
+const adminPasswordInput = document.querySelector("#hubAdminPassword");
+const adminTools = document.querySelector("#hubAdminTools");
+const adminStatus = document.querySelector("#hubAdminStatus");
+const memberAddForm = document.querySelector("#hubMemberAddForm");
+const memberAddName = document.querySelector("#hubMemberAddName");
+const memberRemoveForm = document.querySelector("#hubMemberRemoveForm");
+const memberRemoveName = document.querySelector("#hubMemberRemoveName");
 
 if (nameInput) {
   nameInput.value = localStorage.getItem(HUB_NOTIFY_NAME_KEY) || "";
@@ -13,6 +25,43 @@ function setStatus(message, kind = "neutral") {
   if (!statusText) return;
   statusText.textContent = message;
   statusText.dataset.kind = kind;
+}
+
+function setAdminStatus(message, kind = "neutral") {
+  if (!adminStatus) return;
+  adminStatus.textContent = message;
+  adminStatus.dataset.kind = kind;
+}
+
+function normaliseName(name) {
+  return String(name || "").trim().replace(/\s+/g, " ");
+}
+
+function escapeHtml(value) {
+  return String(value).replace(/[&<>"']/g, (char) => ({
+    "&": "&amp;",
+    "<": "&lt;",
+    ">": "&gt;",
+    '"': "&quot;",
+    "'": "&#39;",
+  }[char]));
+}
+
+function renderMembers() {
+  if (!memberOptions) return;
+  memberOptions.innerHTML = members.map((name) => `<option value="${escapeHtml(name)}"></option>`).join("");
+}
+
+async function loadMembers() {
+  try {
+    const response = await fetch("/api/members", { cache: "no-store" });
+    if (!response.ok) throw new Error("Member list could not be loaded.");
+    const data = await response.json();
+    members = Array.isArray(data.members) ? data.members : [];
+    renderMembers();
+  } catch (error) {
+    setStatus(error.message || "Member list could not be loaded.", "error");
+  }
 }
 
 function urlBase64ToUint8Array(base64String) {
@@ -32,12 +81,17 @@ async function getPublicKey() {
   return data.publicKey;
 }
 
+function registeredName(input) {
+  const userName = normaliseName(input);
+  return members.find((member) => member.toLowerCase() === userName.toLowerCase()) || "";
+}
+
 async function enableHubNotifications(event) {
   event.preventDefault();
 
-  const userName = nameInput?.value.trim();
+  const userName = registeredName(nameInput?.value);
   if (!userName) {
-    setStatus("Enter your name first.", "error");
+    setStatus("Choose a name from the member list first.", "error");
     nameInput?.focus();
     return;
   }
@@ -48,7 +102,7 @@ async function enableHubNotifications(event) {
   }
 
   enableButton.disabled = true;
-  setStatus("Setting up Hub notifications...", "neutral");
+  setStatus("Setting up notifications...", "neutral");
 
   try {
     const publicKey = await getPublicKey();
@@ -59,7 +113,8 @@ async function enableHubNotifications(event) {
     }
 
     const registration = await navigator.serviceWorker.register("/service-worker.js");
-    const subscription = await registration.pushManager.subscribe({
+    const existing = await registration.pushManager.getSubscription();
+    const subscription = existing || await registration.pushManager.subscribe({
       userVisibleOnly: true,
       applicationServerKey: urlBase64ToUint8Array(publicKey),
     });
@@ -75,6 +130,7 @@ async function enableHubNotifications(event) {
       throw new Error(data.error || "Could not save this device.");
     }
 
+    nameInput.value = userName;
     localStorage.setItem(HUB_NOTIFY_NAME_KEY, userName);
     setStatus(`${userName} is set up for Hub notifications on this device.`, "success");
   } catch (error) {
@@ -84,4 +140,74 @@ async function enableHubNotifications(event) {
   }
 }
 
+function adminHeaders() {
+  return {
+    "Content-Type": "application/json",
+    "X-Admin-Password": adminPassword,
+  };
+}
+
+function unlockAdmin(event) {
+  event.preventDefault();
+  adminPassword = adminPasswordInput?.value || "";
+  if (!adminPassword) {
+    setAdminStatus("Enter the admin password.", "error");
+    return;
+  }
+  adminTools.hidden = false;
+  setAdminStatus("Admin tools unlocked.", "success");
+}
+
+async function addMember(event) {
+  event.preventDefault();
+  const name = normaliseName(memberAddName?.value);
+  if (!name) {
+    setAdminStatus("Enter a member name to add.", "error");
+    return;
+  }
+
+  const response = await fetch("/api/members", {
+    method: "POST",
+    headers: adminHeaders(),
+    body: JSON.stringify({ name }),
+  });
+  const data = await response.json().catch(() => ({}));
+  if (!response.ok) {
+    setAdminStatus(data.error || "Member could not be added.", "error");
+    return;
+  }
+  members = data.members || members;
+  renderMembers();
+  memberAddName.value = "";
+  setAdminStatus(`${name} added to the Hub register.`, "success");
+}
+
+async function removeMember(event) {
+  event.preventDefault();
+  const name = registeredName(memberRemoveName?.value);
+  if (!name) {
+    setAdminStatus("Choose a member from the list to remove.", "error");
+    return;
+  }
+
+  const response = await fetch("/api/members", {
+    method: "DELETE",
+    headers: adminHeaders(),
+    body: JSON.stringify({ name }),
+  });
+  const data = await response.json().catch(() => ({}));
+  if (!response.ok) {
+    setAdminStatus(data.error || "Member could not be removed.", "error");
+    return;
+  }
+  members = data.members || members;
+  renderMembers();
+  memberRemoveName.value = "";
+  setAdminStatus(`${name} removed from the Hub register.`, "success");
+}
+
 form?.addEventListener("submit", enableHubNotifications);
+adminLogin?.addEventListener("submit", unlockAdmin);
+memberAddForm?.addEventListener("submit", addMember);
+memberRemoveForm?.addEventListener("submit", removeMember);
+void loadMembers();

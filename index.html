@@ -52,22 +52,6 @@
         />
       </a>
 
-      <section class="notify-panel" aria-labelledby="notifyTitle">
-        <div>
-          <p class="eyebrow">NOTIFICATIONS</p>
-          <h1 id="notifyTitle">One setup for every AWRC app</h1>
-          <p class="notify-copy">Choose your name once here, then Hub notifications can come through for Logbook, Video Library, Signup, and future AWRC tools.</p>
-        </div>
-        <form class="notify-form" id="hubNotifyForm">
-          <label for="hubNotifyName">Your name</label>
-          <div class="notify-row">
-            <input id="hubNotifyName" name="userName" type="text" autocomplete="name" placeholder="Enter name" />
-            <button id="hubEnableNotifications" type="submit">Enable notifications</button>
-          </div>
-          <p class="notify-status" id="hubNotifyStatus" role="status">Notifications are set up from this Hub only once per device.</p>
-        </form>
-      </section>
-
       <nav class="app-grid" aria-label="AWRC apps">
         <a class="app-link" href="https://awrc-logbook.onrender.com/">
           <span class="app-icon image-icon" aria-hidden="true">
@@ -90,6 +74,49 @@
           <span class="app-name">Signup</span>
         </a>
       </nav>
+
+      <section class="utility-panel" aria-label="Hub utilities">
+        <details class="notify-panel">
+          <summary>Notifications</summary>
+          <form class="notify-form" id="hubNotifyForm">
+            <label for="hubNotifyName">Your name</label>
+            <div class="notify-row">
+              <input id="hubNotifyName" name="userName" type="search" list="memberOptions" autocomplete="name" placeholder="Search member" />
+              <datalist id="memberOptions"></datalist>
+              <button id="hubEnableNotifications" type="submit">Enable</button>
+            </div>
+            <p class="notify-status" id="hubNotifyStatus" role="status">Choose your name to enable Hub notifications on this device.</p>
+          </form>
+        </details>
+
+        <details class="admin-panel">
+          <summary>Admin</summary>
+          <form class="admin-login" id="hubAdminLogin">
+            <label for="hubAdminPassword">Password</label>
+            <div class="notify-row">
+              <input id="hubAdminPassword" type="password" inputmode="numeric" autocomplete="current-password" placeholder="Admin password" />
+              <button type="submit">Unlock</button>
+            </div>
+          </form>
+          <div class="admin-tools" id="hubAdminTools" hidden>
+            <form class="notify-form" id="hubMemberAddForm">
+              <label for="hubMemberAddName">Add member</label>
+              <div class="notify-row">
+                <input id="hubMemberAddName" type="text" autocomplete="off" placeholder="Member name" />
+                <button type="submit">Add</button>
+              </div>
+            </form>
+            <form class="notify-form" id="hubMemberRemoveForm">
+              <label for="hubMemberRemoveName">Remove member</label>
+              <div class="notify-row">
+                <input id="hubMemberRemoveName" type="search" list="memberOptions" autocomplete="off" placeholder="Search member" />
+                <button type="submit">Remove</button>
+              </div>
+            </form>
+          </div>
+          <p class="notify-status" id="hubAdminStatus" role="status">Manage the Hub member register.</p>
+        </details>
+      </section>
     </main>
   </body>
 </html>

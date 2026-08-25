@@ -13,6 +13,8 @@ const vapidPublicKey = process.env.VAPID_PUBLIC_KEY || "";
 const vapidPrivateKey = process.env.VAPID_PRIVATE_KEY || "";
 const vapidSubject = process.env.VAPID_SUBJECT || "mailto:admin@awrc.local";
 const notifySecret = process.env.HUB_NOTIFY_SECRET || "";
+const adminPassword = process.env.HUB_ADMIN_PASSWORD || "2852";
+const defaultMembers = require("./default-members.json");
 
 const allowedOrigins = new Set([
   "https://awrc-hub.onrender.com",
@@ -64,9 +66,10 @@ function readState() {
     const parsed = JSON.parse(raw);
     return {
       subscriptions: Array.isArray(parsed.subscriptions) ? parsed.subscriptions : [],
+      members: normaliseMembers(parsed.members),
     };
   } catch (_error) {
-    return { subscriptions: [] };
+    return { subscriptions: [], members: normaliseMembers(defaultMembers) };
   }
 }
 
@@ -77,6 +80,11 @@ function writeState(state) {
 
 function normaliseName(name) {
   return String(name || "").trim().replace(/\s+/g, " ");
+}
+
+function normaliseMembers(members) {
+  const names = Array.isArray(members) && members.length ? members : defaultMembers;
+  return [...new Set(names.map(normaliseName).filter(Boolean))].sort((a, b) => a.localeCompare(b));
 }
 
 function subscriptionKey(item) {
@@ -93,6 +101,10 @@ function authorised(req) {
   const auth = req.headers.authorization || "";
   const bearer = auth.startsWith("Bearer ") ? auth.slice(7) : "";
   return bearer === notifySecret || req.headers["x-hub-notify-secret"] === notifySecret;
+}
+
+function adminAuthorised(req) {
+  return req.headers["x-admin-password"] === adminPassword;
 }
 
 app.get("/api/push/public-key", (_req, res) => {
@@ -114,6 +126,52 @@ app.get("/api/push/status", (req, res) => {
       ? state.subscriptions.some((item) => item.userName.toLowerCase() === userName.toLowerCase())
       : null,
   });
+});
+
+app.get("/api/members", (_req, res) => {
+  const state = readState();
+  res.json({ members: normaliseMembers(state.members) });
+});
+
+app.post("/api/members", (req, res) => {
+  if (!adminAuthorised(req)) {
+    res.status(401).json({ error: "Admin password required" });
+    return;
+  }
+
+  const name = normaliseName(req.body.name);
+  if (!name) {
+    res.status(400).json({ error: "Member name is required" });
+    return;
+  }
+
+  const state = readState();
+  const members = normaliseMembers(state.members);
+  if (!members.some((member) => member.toLowerCase() === name.toLowerCase())) {
+    members.push(name);
+  }
+  state.members = normaliseMembers(members);
+  writeState(state);
+  res.json({ ok: true, members: state.members });
+});
+
+app.delete("/api/members", (req, res) => {
+  if (!adminAuthorised(req)) {
+    res.status(401).json({ error: "Admin password required" });
+    return;
+  }
+
+  const name = normaliseName(req.body.name);
+  if (!name) {
+    res.status(400).json({ error: "Member name is required" });
+    return;
+  }
+
+  const state = readState();
+  state.members = normaliseMembers(state.members).filter((member) => member.toLowerCase() !== name.toLowerCase());
+  state.subscriptions = state.subscriptions.filter((item) => item.userName?.toLowerCase() !== name.toLowerCase());
+  writeState(state);
+  res.json({ ok: true, members: state.members });
 });
 
 app.post("/api/push/subscribe", (req, res) => {
