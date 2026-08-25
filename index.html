@@ -34,6 +34,7 @@
     <link rel="apple-touch-icon" href="./awrc-hub-icon.png" />
     <link rel="manifest" href="./manifest.webmanifest" />
     <link rel="stylesheet" href="./styles.css" />
+    <script src="./hub-notifications.js" defer></script>
   </head>
   <body>
     <main class="hub" aria-label="AWRC Hub">
@@ -50,6 +51,22 @@
           decoding="async"
         />
       </a>
+
+      <section class="notify-panel" aria-labelledby="notifyTitle">
+        <div>
+          <p class="eyebrow">NOTIFICATIONS</p>
+          <h1 id="notifyTitle">One setup for every AWRC app</h1>
+          <p class="notify-copy">Choose your name once here, then Hub notifications can come through for Logbook, Video Library, Signup, and future AWRC tools.</p>
+        </div>
+        <form class="notify-form" id="hubNotifyForm">
+          <label for="hubNotifyName">Your name</label>
+          <div class="notify-row">
+            <input id="hubNotifyName" name="userName" type="text" autocomplete="name" placeholder="Enter name" />
+            <button id="hubEnableNotifications" type="submit">Enable notifications</button>
+          </div>
+          <p class="notify-status" id="hubNotifyStatus" role="status">Notifications are set up from this Hub only once per device.</p>
+        </form>
+      </section>
 
       <nav class="app-grid" aria-label="AWRC apps">
         <a class="app-link" href="https://awrc-logbook.onrender.com/">

@@ -31,12 +31,12 @@ body {
   width: min(100%, 780px);
   min-height: 100vh;
   margin: 0 auto;
-  padding: clamp(44px, 9vh, 88px) 22px 38px;
+  padding: clamp(30px, 6vh, 60px) 22px 38px;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: clamp(42px, 8vh, 72px);
+  gap: clamp(24px, 5vh, 44px);
 }
 
 .club-mark {
@@ -111,6 +111,98 @@ body {
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: clamp(10px, 3vw, 28px);
   align-items: start;
+}
+
+.notify-panel {
+  width: min(100%, 640px);
+  display: grid;
+  gap: 18px;
+  padding: 18px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.76);
+  box-shadow: 0 14px 34px rgba(23, 33, 29, 0.08);
+}
+
+.eyebrow {
+  margin: 0 0 4px;
+  color: var(--green);
+  font-size: 0.72rem;
+  font-weight: 850;
+  letter-spacing: 0;
+}
+
+.notify-panel h1 {
+  margin: 0;
+  color: var(--ink);
+  font-size: clamp(1.38rem, 4vw, 2.05rem);
+  font-weight: 900;
+  line-height: 1.05;
+  letter-spacing: 0;
+}
+
+.notify-copy,
+.notify-status {
+  margin: 8px 0 0;
+  color: var(--muted);
+  font-size: 0.95rem;
+  line-height: 1.35;
+}
+
+.notify-form {
+  display: grid;
+  gap: 8px;
+}
+
+.notify-form label {
+  color: var(--ink);
+  font-size: 0.8rem;
+  font-weight: 800;
+}
+
+.notify-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 10px;
+}
+
+.notify-row input,
+.notify-row button {
+  min-height: 46px;
+  border-radius: 8px;
+  font: inherit;
+}
+
+.notify-row input {
+  width: 100%;
+  border: 1px solid var(--line);
+  padding: 0 13px;
+  color: var(--ink);
+  background: #ffffff;
+}
+
+.notify-row button {
+  border: 0;
+  padding: 0 16px;
+  color: #ffffff;
+  background: var(--green);
+  font-weight: 850;
+  cursor: pointer;
+}
+
+.notify-row button:disabled {
+  cursor: wait;
+  opacity: 0.68;
+}
+
+.notify-status[data-kind="success"] {
+  color: var(--green);
+  font-weight: 750;
+}
+
+.notify-status[data-kind="error"] {
+  color: var(--red);
+  font-weight: 750;
 }
 
 .app-link {
@@ -230,5 +322,9 @@ body {
 
   .app-icon {
     border-radius: 18px;
+  }
+
+  .notify-row {
+    grid-template-columns: 1fr;
   }
 }
