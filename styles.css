@@ -248,6 +248,12 @@ input {
   opacity: 0.68;
 }
 
+.notify-row button[data-enabled="true"] {
+  color: #ffffff;
+  background: var(--blue);
+  box-shadow: inset 0 0 0 1px rgba(35, 105, 161, 0.24);
+}
+
 .notify-status[data-kind="success"] {
   color: var(--green);
   font-weight: 750;

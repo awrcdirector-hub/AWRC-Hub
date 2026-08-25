@@ -21,6 +21,17 @@ if (nameInput) {
   nameInput.value = localStorage.getItem(HUB_NOTIFY_NAME_KEY) || "";
 }
 
+function setEnabledButton(userName) {
+  if (!enableButton) return;
+  enableButton.textContent = userName ? "Enabled" : "Enable";
+  enableButton.dataset.enabled = userName ? "true" : "false";
+  enableButton.setAttribute("aria-label", userName ? `Notifications enabled for ${userName}` : "Enable notifications");
+}
+
+if (nameInput?.value) {
+  setEnabledButton(nameInput.value);
+}
+
 function setStatus(message, kind = "neutral") {
   if (!statusText) return;
   statusText.textContent = message;
@@ -112,7 +123,11 @@ async function enableHubNotifications(event) {
       return;
     }
 
-    const registration = await navigator.serviceWorker.register("/service-worker.js");
+    await navigator.serviceWorker.register("/service-worker.js");
+    const registration = await navigator.serviceWorker.ready;
+    if (!registration.active) {
+      throw new Error("Notifications are not ready yet. Refresh the Hub and try once more.");
+    }
     const existing = await registration.pushManager.getSubscription();
     const subscription = existing || await registration.pushManager.subscribe({
       userVisibleOnly: true,
@@ -132,6 +147,7 @@ async function enableHubNotifications(event) {
 
     nameInput.value = userName;
     localStorage.setItem(HUB_NOTIFY_NAME_KEY, userName);
+    setEnabledButton(userName);
     setStatus(`${userName} is set up for Hub notifications on this device.`, "success");
   } catch (error) {
     setStatus(error.message || "Hub notifications could not be set up.", "error");
