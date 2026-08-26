@@ -94,6 +94,19 @@ function normaliseDate(value) {
   return /^\d{4}-\d{2}-\d{2}$/.test(raw) ? raw : "";
 }
 
+const validRoles = ["Athlete", "Masters", "Coach", "Admin", "Coxswain"];
+
+function normaliseRoles(value) {
+  const rawRoles = Array.isArray(value)
+    ? value
+    : String(value || "").split(/[,/]/);
+  const roles = rawRoles
+    .map(normaliseName)
+    .flatMap((role) => role === "Coach/Admin" ? ["Coach", "Admin"] : [role])
+    .filter((role) => validRoles.includes(role));
+  return [...new Set(roles.length ? roles : ["Athlete"])];
+}
+
 function ageInSeasonYear(dateOfBirth, seasonYear = new Date().getFullYear()) {
   const dob = normaliseDate(dateOfBirth);
   if (!dob) return null;
@@ -123,9 +136,9 @@ function calculatedAgeGroup(profile) {
   const age = ageInSeasonYear(profile.dateOfBirth);
   if (age === null) return profile.ageGroup || "";
   const grade = normaliseName(profile.grade).toLowerCase();
-  const role = normaliseName(profile.role).toLowerCase();
+  const roles = normaliseRoles(profile.roles || profile.role).map((role) => role.toLowerCase());
   const currentAgeGroup = normaliseName(profile.ageGroup).toLowerCase();
-  if (grade.includes("masters") || role.includes("masters") || currentAgeGroup.includes("masters")) {
+  if (grade.includes("masters") || roles.includes("masters") || currentAgeGroup.includes("masters")) {
     return mastersAgeGroup(age);
   }
   if (age < 19) return `U${age + 1}`;
@@ -143,10 +156,10 @@ function normaliseMemberProfile(member) {
     grade: normaliseName(source.grade),
     ageGroup: normaliseName(source.ageGroup || source.age),
     dateOfBirth: normaliseDate(source.dateOfBirth || source.dob),
-    role: normaliseName(source.role) || "Athlete",
+    roles: normaliseRoles(source.roles || source.role),
     active: source.active === false ? false : true,
   };
-  return { ...profile, ageGroup: calculatedAgeGroup(profile) };
+  return { ...profile, role: profile.roles.join(", "), ageGroup: calculatedAgeGroup(profile) };
 }
 
 function normaliseMembers(members) {
@@ -236,7 +249,7 @@ app.post("/api/members", (req, res) => {
     grade: req.body.grade ?? existing?.grade,
     ageGroup: req.body.ageGroup ?? req.body.age ?? existing?.ageGroup,
     dateOfBirth: req.body.dateOfBirth ?? req.body.dob ?? existing?.dateOfBirth,
-    role: req.body.role ?? existing?.role,
+    roles: req.body.roles ?? req.body.role ?? existing?.roles ?? existing?.role,
     active: req.body.active ?? existing?.active,
   });
   const nextMembers = existing

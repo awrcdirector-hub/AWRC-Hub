@@ -21,6 +21,7 @@ const memberRemoveForm = document.querySelector("#hubMemberRemoveForm");
 const memberRemoveName = document.querySelector("#hubMemberRemoveName");
 const rosterBody = document.querySelector("#hubRosterBody");
 const rosterSearch = document.querySelector("#hubRosterSearch");
+const roleOptions = ["Athlete", "Masters", "Coach", "Admin", "Coxswain"];
 
 function savedNotificationName() {
   return localStorage.getItem(HUB_NOTIFY_NAME_KEY) || "";
@@ -78,6 +79,7 @@ function normaliseMember(member) {
   const source = typeof member === "string" ? { name: member } : member || {};
   const name = normaliseName(source.name);
   if (!name) return null;
+  const roles = normaliseRoles(source.roles || source.role);
 
   return {
     id: normaliseName(source.id) || name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, ""),
@@ -85,9 +87,21 @@ function normaliseMember(member) {
     grade: normaliseName(source.grade),
     ageGroup: normaliseName(source.ageGroup || source.age),
     dateOfBirth: normaliseName(source.dateOfBirth || source.dob),
-    role: normaliseName(source.role) || "Athlete",
+    roles,
+    role: roles.join(", "),
     active: source.active === false ? false : true,
   };
+}
+
+function normaliseRoles(value) {
+  const rawRoles = Array.isArray(value)
+    ? value
+    : String(value || "").split(/[,/]/);
+  const roles = rawRoles
+    .map(normaliseName)
+    .flatMap((role) => role === "Coach/Admin" ? ["Coach", "Admin"] : [role])
+    .filter((role) => roleOptions.includes(role));
+  return [...new Set(roles.length ? roles : ["Athlete"])];
 }
 
 function normaliseMemberList(nextMembers) {
@@ -111,7 +125,7 @@ function memberGaps(member) {
   return [
     member.grade ? "" : "grade",
     member.dateOfBirth ? "" : "DOB",
-    member.role ? "" : "role",
+    member.roles?.length ? "" : "role",
   ].filter(Boolean);
 }
 
@@ -125,9 +139,9 @@ function rosterRow(member) {
       <td><input data-field="dateOfBirth" type="date" value="${escapeHtml(member.dateOfBirth)}" /></td>
       <td><span class="age-group">${escapeHtml(member.ageGroup || "Set DOB")}</span></td>
       <td>
-        <select data-field="role">
-          ${["Athlete", "Masters", "Coach/Admin", "Coxswain", "Support"].map((role) => (
-            `<option value="${escapeHtml(role)}"${member.role === role ? " selected" : ""}>${escapeHtml(role)}</option>`
+        <select data-field="roles" multiple>
+          ${roleOptions.map((role) => (
+            `<option value="${escapeHtml(role)}"${member.roles.includes(role) ? " selected" : ""}>${escapeHtml(role)}</option>`
           )).join("")}
         </select>
       </td>
@@ -138,7 +152,10 @@ function rosterRow(member) {
         </select>
         <small class="${gaps.length ? "missing" : "complete"}">${escapeHtml(missingText)}</small>
       </td>
-      <td><button class="roster-save" data-roster-save="${escapeHtml(member.id)}" type="button">Save</button></td>
+      <td class="roster-actions">
+        <button class="roster-save" data-roster-save="${escapeHtml(member.id)}" type="button">Save</button>
+        <button class="roster-delete" data-roster-delete="${escapeHtml(member.name)}" type="button">Delete</button>
+      </td>
     </tr>
   `;
 }
@@ -279,7 +296,7 @@ async function addMember(event) {
       name,
       grade: memberAddGrade?.value || "",
       dateOfBirth: memberAddDateOfBirth?.value || "",
-      role: memberAddRole?.value || "Athlete",
+      roles: [...(memberAddRole?.selectedOptions || [])].map((option) => option.value),
     }),
   });
   const data = await response.json().catch(() => ({}));
@@ -323,8 +340,9 @@ async function saveRosterRow(button) {
   const originalId = button.dataset.rosterSave;
   const existing = members.find((member) => member.id === originalId);
   const fields = Object.fromEntries(
-    [...row.querySelectorAll("[data-field]")].map((field) => [field.dataset.field, field.value])
+    [...row.querySelectorAll("[data-field]:not([multiple])")].map((field) => [field.dataset.field, field.value])
   );
+  fields.roles = [...row.querySelectorAll("[data-field='roles'] option:checked")].map((option) => option.value);
   const name = normaliseName(fields.name);
   if (!name) {
     setAdminStatus("Roster row needs a name before saving.", "error");
@@ -340,7 +358,7 @@ async function saveRosterRow(button) {
       name,
       grade: fields.grade || "",
       dateOfBirth: fields.dateOfBirth || "",
-      role: fields.role || "Athlete",
+      roles: fields.roles,
       active: fields.active !== "false",
     }),
   });
@@ -355,6 +373,28 @@ async function saveRosterRow(button) {
   setAdminStatus(`${name} saved in the Hub register.`, "success");
 }
 
+async function deleteRosterRow(button) {
+  const name = normaliseName(button.dataset.rosterDelete);
+  if (!name) return;
+  if (!window.confirm(`Delete ${name} from the Hub register?`)) return;
+
+  button.disabled = true;
+  const response = await fetch("/api/members", {
+    method: "DELETE",
+    headers: adminHeaders(),
+    body: JSON.stringify({ name }),
+  });
+  const data = await response.json().catch(() => ({}));
+  button.disabled = false;
+  if (!response.ok) {
+    setAdminStatus(data.error || "Member could not be deleted.", "error");
+    return;
+  }
+  members = normaliseMemberList(data.members || data.names || members);
+  renderMembers();
+  setAdminStatus(`${name} deleted from the Hub register.`, "success");
+}
+
 form?.addEventListener("submit", enableHubNotifications);
 nameInput?.addEventListener("input", syncEnabledButtonToName);
 nameInput?.addEventListener("change", syncEnabledButtonToName);
@@ -363,7 +403,9 @@ memberAddForm?.addEventListener("submit", addMember);
 memberRemoveForm?.addEventListener("submit", removeMember);
 rosterSearch?.addEventListener("input", renderRoster);
 rosterBody?.addEventListener("click", (event) => {
-  const button = event.target.closest("[data-roster-save]");
-  if (button) void saveRosterRow(button);
+  const saveButton = event.target.closest("[data-roster-save]");
+  if (saveButton) void saveRosterRow(saveButton);
+  const deleteButton = event.target.closest("[data-roster-delete]");
+  if (deleteButton) void deleteRosterRow(deleteButton);
 });
 void loadMembers();

@@ -33,8 +33,8 @@
     <link rel="icon" href="./awrc-hub-icon.png" type="image/png" />
     <link rel="apple-touch-icon" href="./awrc-hub-icon.png" />
     <link rel="manifest" href="./manifest.webmanifest" />
-    <link rel="stylesheet" href="./styles.css?v=202608261445" />
-    <script src="./hub-notifications.js?v=202608261445" defer></script>
+    <link rel="stylesheet" href="./styles.css?v=202608261510" />
+    <script src="./hub-notifications.js?v=202608261510" defer></script>
   </head>
   <body>
     <main class="hub" aria-label="AWRC Hub">
@@ -108,12 +108,12 @@
               <div class="notify-row notify-row-wrap">
                 <input id="hubMemberAddGrade" type="text" autocomplete="off" placeholder="Grade" />
                 <input id="hubMemberAddDateOfBirth" type="date" aria-label="Date of birth" />
-                <select id="hubMemberAddRole" aria-label="Member role">
-                  <option value="Athlete">Athlete</option>
+                <select id="hubMemberAddRole" aria-label="Member roles" multiple>
+                  <option value="Athlete" selected>Athlete</option>
                   <option value="Masters">Masters</option>
-                  <option value="Coach/Admin">Coach/Admin</option>
+                  <option value="Coach">Coach</option>
+                  <option value="Admin">Admin</option>
                   <option value="Coxswain">Coxswain</option>
-                  <option value="Support">Support</option>
                 </select>
               </div>
             </form>

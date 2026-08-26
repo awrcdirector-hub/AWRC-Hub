@@ -316,6 +316,12 @@ input {
   font: inherit;
 }
 
+.roster-table select[multiple],
+.notify-row select[multiple] {
+  min-height: 84px;
+  padding: 7px 10px;
+}
+
 .roster-table-wrap {
   max-height: min(62vh, 720px);
   overflow: auto;
@@ -372,7 +378,13 @@ input {
   color: var(--green);
 }
 
-.roster-save {
+.roster-actions {
+  display: grid;
+  gap: 6px;
+}
+
+.roster-save,
+.roster-delete {
   min-height: 36px;
   border: 0;
   border-radius: 8px;
@@ -382,6 +394,10 @@ input {
   font: inherit;
   font-weight: 900;
   cursor: pointer;
+}
+
+.roster-delete {
+  background: var(--red);
 }
 
 .app-link {
