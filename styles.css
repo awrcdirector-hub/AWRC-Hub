@@ -46,6 +46,7 @@ input {
 
 .club-mark {
   position: relative;
+  align-self: center;
   width: clamp(176px, 36vw, 270px);
   aspect-ratio: 1;
   display: grid;
