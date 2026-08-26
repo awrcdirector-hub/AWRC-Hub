@@ -15,10 +15,12 @@ const adminStatus = document.querySelector("#hubAdminStatus");
 const memberAddForm = document.querySelector("#hubMemberAddForm");
 const memberAddName = document.querySelector("#hubMemberAddName");
 const memberAddGrade = document.querySelector("#hubMemberAddGrade");
-const memberAddAgeGroup = document.querySelector("#hubMemberAddAgeGroup");
+const memberAddDateOfBirth = document.querySelector("#hubMemberAddDateOfBirth");
 const memberAddRole = document.querySelector("#hubMemberAddRole");
 const memberRemoveForm = document.querySelector("#hubMemberRemoveForm");
 const memberRemoveName = document.querySelector("#hubMemberRemoveName");
+const rosterBody = document.querySelector("#hubRosterBody");
+const rosterSearch = document.querySelector("#hubRosterSearch");
 
 function savedNotificationName() {
   return localStorage.getItem(HUB_NOTIFY_NAME_KEY) || "";
@@ -82,6 +84,7 @@ function normaliseMember(member) {
     name,
     grade: normaliseName(source.grade),
     ageGroup: normaliseName(source.ageGroup || source.age),
+    dateOfBirth: normaliseName(source.dateOfBirth || source.dob),
     role: normaliseName(source.role) || "Athlete",
     active: source.active === false ? false : true,
   };
@@ -101,6 +104,53 @@ function memberNames() {
 function renderMembers() {
   if (!memberOptions) return;
   memberOptions.innerHTML = memberNames().map((name) => `<option value="${escapeHtml(name)}"></option>`).join("");
+  renderRoster();
+}
+
+function memberGaps(member) {
+  return [
+    member.grade ? "" : "grade",
+    member.dateOfBirth ? "" : "DOB",
+    member.role ? "" : "role",
+  ].filter(Boolean);
+}
+
+function rosterRow(member) {
+  const gaps = memberGaps(member);
+  const missingText = gaps.length ? `Missing ${gaps.join(", ")}` : "Complete";
+  return `
+    <tr data-member-id="${escapeHtml(member.id)}">
+      <td><input data-field="name" value="${escapeHtml(member.name)}" /></td>
+      <td><input data-field="grade" value="${escapeHtml(member.grade)}" placeholder="Grade" /></td>
+      <td><input data-field="dateOfBirth" type="date" value="${escapeHtml(member.dateOfBirth)}" /></td>
+      <td><span class="age-group">${escapeHtml(member.ageGroup || "Set DOB")}</span></td>
+      <td>
+        <select data-field="role">
+          ${["Athlete", "Masters", "Coach/Admin", "Coxswain", "Support"].map((role) => (
+            `<option value="${escapeHtml(role)}"${member.role === role ? " selected" : ""}>${escapeHtml(role)}</option>`
+          )).join("")}
+        </select>
+      </td>
+      <td>
+        <select data-field="active">
+          <option value="true"${member.active ? " selected" : ""}>Active</option>
+          <option value="false"${member.active ? "" : " selected"}>Inactive</option>
+        </select>
+        <small class="${gaps.length ? "missing" : "complete"}">${escapeHtml(missingText)}</small>
+      </td>
+      <td><button class="roster-save" data-roster-save="${escapeHtml(member.id)}" type="button">Save</button></td>
+    </tr>
+  `;
+}
+
+function renderRoster() {
+  if (!rosterBody) return;
+  const search = normaliseName(rosterSearch?.value).toLowerCase();
+  const visibleMembers = search
+    ? members.filter((member) => [member.name, member.grade, member.ageGroup, member.role].join(" ").toLowerCase().includes(search))
+    : members;
+
+  rosterBody.innerHTML = visibleMembers.map(rosterRow).join("");
 }
 
 async function loadMembers() {
@@ -228,7 +278,7 @@ async function addMember(event) {
     body: JSON.stringify({
       name,
       grade: memberAddGrade?.value || "",
-      ageGroup: memberAddAgeGroup?.value || "",
+      dateOfBirth: memberAddDateOfBirth?.value || "",
       role: memberAddRole?.value || "Athlete",
     }),
   });
@@ -267,10 +317,53 @@ async function removeMember(event) {
   setAdminStatus(`${name} removed from the Hub register.`, "success");
 }
 
+async function saveRosterRow(button) {
+  const row = button.closest("tr");
+  if (!row) return;
+  const originalId = button.dataset.rosterSave;
+  const existing = members.find((member) => member.id === originalId);
+  const fields = Object.fromEntries(
+    [...row.querySelectorAll("[data-field]")].map((field) => [field.dataset.field, field.value])
+  );
+  const name = normaliseName(fields.name);
+  if (!name) {
+    setAdminStatus("Roster row needs a name before saving.", "error");
+    return;
+  }
+
+  button.disabled = true;
+  const response = await fetch("/api/members", {
+    method: "POST",
+    headers: adminHeaders(),
+    body: JSON.stringify({
+      id: existing?.id || originalId,
+      name,
+      grade: fields.grade || "",
+      dateOfBirth: fields.dateOfBirth || "",
+      role: fields.role || "Athlete",
+      active: fields.active !== "false",
+    }),
+  });
+  const data = await response.json().catch(() => ({}));
+  button.disabled = false;
+  if (!response.ok) {
+    setAdminStatus(data.error || "Roster row could not be saved.", "error");
+    return;
+  }
+  members = normaliseMemberList(data.members || data.names || members);
+  renderMembers();
+  setAdminStatus(`${name} saved in the Hub register.`, "success");
+}
+
 form?.addEventListener("submit", enableHubNotifications);
 nameInput?.addEventListener("input", syncEnabledButtonToName);
 nameInput?.addEventListener("change", syncEnabledButtonToName);
 adminLogin?.addEventListener("submit", unlockAdmin);
 memberAddForm?.addEventListener("submit", addMember);
 memberRemoveForm?.addEventListener("submit", removeMember);
+rosterSearch?.addEventListener("input", renderRoster);
+rosterBody?.addEventListener("click", (event) => {
+  const button = event.target.closest("[data-roster-save]");
+  if (button) void saveRosterRow(button);
+});
 void loadMembers();

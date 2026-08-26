@@ -242,7 +242,7 @@ input {
 
 .admin-tools {
   display: grid;
-  gap: 10px;
+  gap: 14px;
 }
 
 .admin-tools[hidden] {
@@ -268,6 +268,113 @@ input {
 .notify-status[data-kind="error"] {
   color: var(--red);
   font-weight: 750;
+}
+
+.roster-manager {
+  display: grid;
+  gap: 12px;
+  padding-top: 6px;
+}
+
+.roster-heading {
+  align-items: end;
+  display: grid;
+  gap: 12px;
+  grid-template-columns: minmax(0, 1fr) minmax(220px, 320px);
+}
+
+.roster-heading h2 {
+  margin: 0;
+  color: var(--ink);
+  font-size: 1.2rem;
+  font-weight: 950;
+}
+
+.roster-heading p {
+  margin: 3px 0 0;
+  color: var(--muted);
+  font-size: 0.86rem;
+}
+
+.roster-heading input,
+.roster-table input,
+.roster-table select {
+  width: 100%;
+  min-height: 36px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 0 10px;
+  color: var(--ink);
+  background: #ffffff;
+  font: inherit;
+}
+
+.roster-table-wrap {
+  max-height: min(62vh, 720px);
+  overflow: auto;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #ffffff;
+}
+
+.roster-table {
+  width: 100%;
+  min-width: 920px;
+  border-collapse: collapse;
+}
+
+.roster-table th,
+.roster-table td {
+  border-bottom: 1px solid var(--line);
+  padding: 8px;
+  text-align: left;
+  vertical-align: top;
+}
+
+.roster-table th {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  color: var(--ink);
+  background: #f7fafb;
+  font-size: 0.78rem;
+  font-weight: 950;
+  text-transform: uppercase;
+}
+
+.age-group {
+  display: inline-flex;
+  min-height: 36px;
+  align-items: center;
+  color: var(--ink);
+  font-weight: 850;
+}
+
+.roster-table small {
+  display: block;
+  margin-top: 4px;
+  font-size: 0.72rem;
+  font-weight: 850;
+}
+
+.roster-table small.missing {
+  color: var(--red);
+}
+
+.roster-table small.complete {
+  color: var(--green);
+}
+
+.roster-save {
+  min-height: 36px;
+  border: 0;
+  border-radius: 8px;
+  padding: 0 12px;
+  color: #ffffff;
+  background: var(--green);
+  font: inherit;
+  font-weight: 900;
+  cursor: pointer;
 }
 
 .app-link {
@@ -394,6 +501,11 @@ input {
   }
 
   .notify-row {
+    grid-template-columns: 1fr;
+  }
+
+  .notify-row-wrap,
+  .roster-heading {
     grid-template-columns: 1fr;
   }
 }

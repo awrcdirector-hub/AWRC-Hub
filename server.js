@@ -89,19 +89,64 @@ function memberSlug(name) {
   return normaliseName(name).toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
 }
 
+function normaliseDate(value) {
+  const raw = String(value || "").trim();
+  return /^\d{4}-\d{2}-\d{2}$/.test(raw) ? raw : "";
+}
+
+function ageInSeasonYear(dateOfBirth, seasonYear = new Date().getFullYear()) {
+  const dob = normaliseDate(dateOfBirth);
+  if (!dob) return null;
+  const [birthYear] = dob.split("-").map(Number);
+  const age = seasonYear - birthYear;
+  return age >= 0 && age < 130 ? age : null;
+}
+
+function mastersAgeGroup(age) {
+  if (age === null || age < 27) return "";
+  if (age <= 35) return "Masters A";
+  if (age <= 42) return "Masters B";
+  if (age <= 49) return "Masters C";
+  if (age <= 54) return "Masters D";
+  if (age <= 59) return "Masters E";
+  if (age <= 64) return "Masters F";
+  if (age <= 69) return "Masters G";
+  if (age <= 74) return "Masters H";
+  if (age <= 79) return "Masters I";
+  if (age <= 82) return "Masters J";
+  if (age <= 85) return "Masters K";
+  if (age <= 88) return "Masters L";
+  return "Masters M";
+}
+
+function calculatedAgeGroup(profile) {
+  const age = ageInSeasonYear(profile.dateOfBirth);
+  if (age === null) return profile.ageGroup || "";
+  const grade = normaliseName(profile.grade).toLowerCase();
+  const role = normaliseName(profile.role).toLowerCase();
+  const currentAgeGroup = normaliseName(profile.ageGroup).toLowerCase();
+  if (grade.includes("masters") || role.includes("masters") || currentAgeGroup.includes("masters")) {
+    return mastersAgeGroup(age);
+  }
+  if (age < 19) return `U${age + 1}`;
+  return profile.ageGroup || "Open";
+}
+
 function normaliseMemberProfile(member) {
   const source = typeof member === "string" ? { name: member } : member || {};
   const name = normaliseName(source.name);
   if (!name) return null;
 
-  return {
+  const profile = {
     id: normaliseName(source.id) || memberSlug(name),
     name,
     grade: normaliseName(source.grade),
     ageGroup: normaliseName(source.ageGroup || source.age),
+    dateOfBirth: normaliseDate(source.dateOfBirth || source.dob),
     role: normaliseName(source.role) || "Athlete",
     active: source.active === false ? false : true,
   };
+  return { ...profile, ageGroup: calculatedAgeGroup(profile) };
 }
 
 function normaliseMembers(members) {
@@ -190,6 +235,7 @@ app.post("/api/members", (req, res) => {
     name,
     grade: req.body.grade ?? existing?.grade,
     ageGroup: req.body.ageGroup ?? req.body.age ?? existing?.ageGroup,
+    dateOfBirth: req.body.dateOfBirth ?? req.body.dob ?? existing?.dateOfBirth,
     role: req.body.role ?? existing?.role,
     active: req.body.active ?? existing?.active,
   });

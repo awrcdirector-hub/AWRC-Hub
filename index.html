@@ -107,9 +107,10 @@
               </div>
               <div class="notify-row notify-row-wrap">
                 <input id="hubMemberAddGrade" type="text" autocomplete="off" placeholder="Grade" />
-                <input id="hubMemberAddAgeGroup" type="text" autocomplete="off" placeholder="Age group" />
+                <input id="hubMemberAddDateOfBirth" type="date" aria-label="Date of birth" />
                 <select id="hubMemberAddRole" aria-label="Member role">
                   <option value="Athlete">Athlete</option>
+                  <option value="Masters">Masters</option>
                   <option value="Coach/Admin">Coach/Admin</option>
                   <option value="Coxswain">Coxswain</option>
                   <option value="Support">Support</option>
@@ -123,6 +124,31 @@
                 <button type="submit">Remove</button>
               </div>
             </form>
+            <section class="roster-manager" aria-label="Hub roster manager">
+              <div class="roster-heading">
+                <div>
+                  <h2>Roster</h2>
+                  <p>Masters age groups update from date of birth when the season year rolls over on 1 January.</p>
+                </div>
+                <input id="hubRosterSearch" type="search" autocomplete="off" placeholder="Search roster" />
+              </div>
+              <div class="roster-table-wrap">
+                <table class="roster-table">
+                  <thead>
+                    <tr>
+                      <th>Name</th>
+                      <th>Grade</th>
+                      <th>Date of birth</th>
+                      <th>Age group</th>
+                      <th>Role</th>
+                      <th>Status</th>
+                      <th></th>
+                    </tr>
+                  </thead>
+                  <tbody id="hubRosterBody"></tbody>
+                </table>
+              </div>
+            </section>
           </div>
           <p class="notify-status" id="hubAdminStatus" role="status">Manage the Hub member register.</p>
         </details>
