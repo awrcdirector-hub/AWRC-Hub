@@ -21,7 +21,7 @@ const memberRemoveForm = document.querySelector("#hubMemberRemoveForm");
 const memberRemoveName = document.querySelector("#hubMemberRemoveName");
 const rosterBody = document.querySelector("#hubRosterBody");
 const rosterSearch = document.querySelector("#hubRosterSearch");
-const roleOptions = ["Athlete", "Masters", "Coach", "Admin", "Coxswain"];
+const roleOptions = ["Athlete", "Coach", "Admin", "Coxswain"];
 
 function savedNotificationName() {
   return localStorage.getItem(HUB_NOTIFY_NAME_KEY) || "";
@@ -135,15 +135,15 @@ function rosterRow(member) {
   return `
     <tr data-member-id="${escapeHtml(member.id)}">
       <td><input data-field="name" value="${escapeHtml(member.name)}" /></td>
-      <td><input data-field="grade" value="${escapeHtml(member.grade)}" placeholder="Grade" /></td>
+      <td><input data-field="grade" value="${escapeHtml(member.grade)}" placeholder="Ability grade" /></td>
       <td><input data-field="dateOfBirth" type="date" value="${escapeHtml(member.dateOfBirth)}" /></td>
       <td><span class="age-group">${escapeHtml(member.ageGroup || "Set DOB")}</span></td>
       <td>
-        <select data-field="roles" multiple>
+        <div class="role-checkboxes" data-field="roles">
           ${roleOptions.map((role) => (
-            `<option value="${escapeHtml(role)}"${member.roles.includes(role) ? " selected" : ""}>${escapeHtml(role)}</option>`
+            `<label><input type="checkbox" value="${escapeHtml(role)}"${member.roles.includes(role) ? " checked" : ""} /> ${escapeHtml(role)}</label>`
           )).join("")}
-        </select>
+        </div>
       </td>
       <td>
         <select data-field="active">
@@ -296,7 +296,7 @@ async function addMember(event) {
       name,
       grade: memberAddGrade?.value || "",
       dateOfBirth: memberAddDateOfBirth?.value || "",
-      roles: [...(memberAddRole?.selectedOptions || [])].map((option) => option.value),
+      roles: [...(memberAddRole?.querySelectorAll("input:checked") || [])].map((option) => option.value),
     }),
   });
   const data = await response.json().catch(() => ({}));
@@ -342,7 +342,7 @@ async function saveRosterRow(button) {
   const fields = Object.fromEntries(
     [...row.querySelectorAll("[data-field]:not([multiple])")].map((field) => [field.dataset.field, field.value])
   );
-  fields.roles = [...row.querySelectorAll("[data-field='roles'] option:checked")].map((option) => option.value);
+  fields.roles = [...row.querySelectorAll("[data-field='roles'] input:checked")].map((option) => option.value);
   const name = normaliseName(fields.name);
   if (!name) {
     setAdminStatus("Roster row needs a name before saving.", "error");

@@ -94,7 +94,7 @@ function normaliseDate(value) {
   return /^\d{4}-\d{2}-\d{2}$/.test(raw) ? raw : "";
 }
 
-const validRoles = ["Athlete", "Masters", "Coach", "Admin", "Coxswain"];
+const validRoles = ["Athlete", "Coach", "Admin", "Coxswain"];
 
 function normaliseRoles(value) {
   const rawRoles = Array.isArray(value)
@@ -135,14 +135,9 @@ function mastersAgeGroup(age) {
 function calculatedAgeGroup(profile) {
   const age = ageInSeasonYear(profile.dateOfBirth);
   if (age === null) return profile.ageGroup || "";
-  const grade = normaliseName(profile.grade).toLowerCase();
-  const roles = normaliseRoles(profile.roles || profile.role).map((role) => role.toLowerCase());
-  const currentAgeGroup = normaliseName(profile.ageGroup).toLowerCase();
-  if (grade.includes("masters") || roles.includes("masters") || currentAgeGroup.includes("masters")) {
-    return mastersAgeGroup(age);
-  }
-  if (age < 19) return `U${age + 1}`;
-  return profile.ageGroup || "Open";
+  if (age < 23) return `U${age + 1}`;
+  if (age < 27) return "Open";
+  return mastersAgeGroup(age);
 }
 
 function normaliseMemberProfile(member) {
