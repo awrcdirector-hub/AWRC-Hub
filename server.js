@@ -107,6 +107,28 @@ function normaliseRoles(value) {
   return [...new Set(roles.length ? roles : ["Athlete"])];
 }
 
+function hasBodyField(body, key) {
+  return Object.prototype.hasOwnProperty.call(body, key);
+}
+
+function nonBlankBodyValue(body, keys, fallback = "") {
+  for (const key of keys) {
+    if (!hasBodyField(body, key)) continue;
+    const value = normaliseName(body[key]);
+    if (value) return value;
+  }
+  return fallback;
+}
+
+function validBodyDate(body, keys, fallback = "") {
+  for (const key of keys) {
+    if (!hasBodyField(body, key)) continue;
+    const value = normaliseDate(body[key]);
+    if (value) return value;
+  }
+  return fallback;
+}
+
 function ageInSeasonYear(dateOfBirth, seasonYear = new Date().getFullYear()) {
   const dob = normaliseDate(dateOfBirth);
   if (!dob) return null;
@@ -237,18 +259,25 @@ app.post("/api/members", (req, res) => {
 
   const state = readState();
   const members = normaliseMembers(state.members);
-  const existing = members.find((member) => member.name.toLowerCase() === name.toLowerCase());
+  const bodyId = normaliseName(req.body.id);
+  const existing = members.find((member) => bodyId && member.id === bodyId)
+    || members.find((member) => member.name.toLowerCase() === name.toLowerCase());
+  const incomingRoles = hasBodyField(req.body, "roles")
+    ? req.body.roles
+    : hasBodyField(req.body, "role")
+      ? req.body.role
+      : existing?.roles ?? existing?.role;
   const nextProfile = normaliseMemberProfile({
     ...(existing || {}),
     name,
-    grade: req.body.grade ?? existing?.grade,
-    ageGroup: req.body.ageGroup ?? req.body.age ?? existing?.ageGroup,
-    dateOfBirth: req.body.dateOfBirth ?? req.body.dob ?? existing?.dateOfBirth,
-    roles: req.body.roles ?? req.body.role ?? existing?.roles ?? existing?.role,
-    active: req.body.active ?? existing?.active,
+    grade: nonBlankBodyValue(req.body, ["grade"], existing?.grade),
+    ageGroup: nonBlankBodyValue(req.body, ["ageGroup", "age"], existing?.ageGroup),
+    dateOfBirth: validBodyDate(req.body, ["dateOfBirth", "dob"], existing?.dateOfBirth),
+    roles: incomingRoles,
+    active: hasBodyField(req.body, "active") ? req.body.active : existing?.active,
   });
   const nextMembers = existing
-    ? members.map((member) => (member.name.toLowerCase() === name.toLowerCase() ? nextProfile : member))
+    ? members.map((member) => (member.id === existing.id ? nextProfile : member))
     : [...members, nextProfile];
   state.members = normaliseMembers(nextMembers);
   writeState(state);
