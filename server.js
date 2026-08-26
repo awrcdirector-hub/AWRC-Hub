@@ -7,7 +7,9 @@ const webPush = require("web-push");
 const app = express();
 const port = process.env.PORT || 10000;
 const publicDir = __dirname;
-const stateFile = process.env.HUB_STATE_FILE || path.join(publicDir, "data", "hub-notifications-state.json");
+const renderDiskStateFile = "/var/data/hub-notifications-state.json";
+const stateFile = process.env.HUB_STATE_FILE
+  || (fs.existsSync(path.dirname(renderDiskStateFile)) ? renderDiskStateFile : path.join(publicDir, "data", "hub-notifications-state.json"));
 const hubBaseUrl = (process.env.HUB_BASE_URL || "https://awrc-hub.onrender.com").replace(/\/$/, "");
 const vapidPublicKey = process.env.VAPID_PUBLIC_KEY || "";
 const vapidPrivateKey = process.env.VAPID_PRIVATE_KEY || "";
@@ -228,15 +230,22 @@ app.get("/api/push/public-key", (_req, res) => {
 
 app.get("/api/push/status", (req, res) => {
   const userName = normaliseName(req.query.userName);
+  const endpoint = normaliseName(req.query.endpoint);
   const state = readState();
   const users = [...new Set(state.subscriptions.map((item) => item.userName).filter(Boolean))].sort();
+  const userRegistered = userName
+    ? state.subscriptions.some((item) => item.userName.toLowerCase() === userName.toLowerCase())
+    : null;
+  const deviceRegistered = endpoint
+    ? state.subscriptions.some((item) => item.subscription?.endpoint === endpoint)
+    : null;
   res.json({
     configured: Boolean(vapidPublicKey && vapidPrivateKey),
     subscriptionCount: state.subscriptions.length,
     users,
-    userRegistered: userName
-      ? state.subscriptions.some((item) => item.userName.toLowerCase() === userName.toLowerCase())
-      : null,
+    userRegistered,
+    deviceRegistered,
+    registered: Boolean(userRegistered && (deviceRegistered ?? true)),
   });
 });
 

@@ -38,15 +38,13 @@ function setEnabledButton(userName) {
   enableButton.setAttribute("aria-label", userName ? `Notifications enabled for ${userName}` : "Enable notifications");
 }
 
-if (nameInput?.value) {
-  setEnabledButton(nameInput.value);
-}
+setEnabledButton("");
 
 function syncEnabledButtonToName() {
   const selectedName = registeredName(nameInput?.value);
   const savedName = savedNotificationName();
   const stillEnabled = selectedName && savedName && selectedName.toLowerCase() === savedName.toLowerCase();
-  setEnabledButton(stillEnabled ? selectedName : "");
+  if (!stillEnabled) setEnabledButton("");
 }
 
 function setStatus(message, kind = "neutral") {
@@ -177,6 +175,7 @@ async function loadMembers() {
     const data = await response.json();
     members = normaliseMemberList(data.members || data.names);
     renderMembers();
+    await verifySavedNotificationStatus();
   } catch (error) {
     setStatus(error.message || "Member list could not be loaded.", "error");
   }
@@ -197,6 +196,40 @@ async function getPublicKey() {
     throw new Error("Hub notifications need VAPID keys on Render first.");
   }
   return data.publicKey;
+}
+
+async function currentPushEndpoint() {
+  if (!("serviceWorker" in navigator) || !("PushManager" in window)) return "";
+  const registration = await navigator.serviceWorker.getRegistration();
+  const subscription = await registration?.pushManager.getSubscription();
+  return subscription?.endpoint || "";
+}
+
+async function verifySavedNotificationStatus() {
+  const savedName = registeredName(savedNotificationName());
+  if (!savedName) {
+    setEnabledButton("");
+    return;
+  }
+
+  nameInput.value = savedName;
+  try {
+    const endpoint = await currentPushEndpoint();
+    const params = new URLSearchParams({ userName: savedName });
+    if (endpoint) params.set("endpoint", endpoint);
+    const response = await fetch(`/api/push/status?${params.toString()}`, { cache: "no-store" });
+    if (!response.ok) throw new Error("Could not check notification status.");
+    const data = await response.json();
+    if (data.registered) {
+      setEnabledButton(savedName);
+      setStatus(`${savedName} is set up for Hub notifications on this device.`, "success");
+      return;
+    }
+    setEnabledButton("");
+    setStatus(`${savedName} needs notifications enabled again on this device.`, "error");
+  } catch {
+    setEnabledButton("");
+  }
 }
 
 function registeredName(input) {
