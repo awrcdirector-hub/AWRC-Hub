@@ -24,6 +24,9 @@ const allowedOrigins = new Set([
   "http://localhost:10000",
   "http://localhost:3000",
   "http://localhost:4173",
+  "http://localhost:4185",
+  "http://localhost:4186",
+  "http://localhost:4190",
 ]);
 
 const appIcons = {
@@ -45,8 +48,8 @@ app.use((req, res, next) => {
     res.setHeader("Access-Control-Allow-Origin", origin);
     res.setHeader("Vary", "Origin");
   }
-  res.setHeader("Access-Control-Allow-Methods", "GET,POST,OPTIONS");
-  res.setHeader("Access-Control-Allow-Headers", "Content-Type,Authorization,X-Hub-Notify-Secret");
+  res.setHeader("Access-Control-Allow-Methods", "GET,POST,DELETE,OPTIONS");
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type,Authorization,X-Hub-Notify-Secret,X-Admin-Password");
   if (req.method === "OPTIONS") {
     res.status(204).end();
     return;
@@ -82,9 +85,43 @@ function normaliseName(name) {
   return String(name || "").trim().replace(/\s+/g, " ");
 }
 
+function memberSlug(name) {
+  return normaliseName(name).toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
+}
+
+function normaliseMemberProfile(member) {
+  const source = typeof member === "string" ? { name: member } : member || {};
+  const name = normaliseName(source.name);
+  if (!name) return null;
+
+  return {
+    id: normaliseName(source.id) || memberSlug(name),
+    name,
+    grade: normaliseName(source.grade),
+    ageGroup: normaliseName(source.ageGroup || source.age),
+    role: normaliseName(source.role) || "Athlete",
+    active: source.active === false ? false : true,
+  };
+}
+
 function normaliseMembers(members) {
-  const names = Array.isArray(members) && members.length ? members : defaultMembers;
-  return [...new Set(names.map(normaliseName).filter(Boolean))].sort((a, b) => a.localeCompare(b));
+  const source = Array.isArray(members) && members.length ? members : defaultMembers;
+  const membersByName = new Map();
+  source.forEach((member) => {
+    const profile = normaliseMemberProfile(member);
+    if (!profile) return;
+    membersByName.set(profile.name.toLowerCase(), { ...membersByName.get(profile.name.toLowerCase()), ...profile });
+  });
+  return [...membersByName.values()].sort((a, b) => a.name.localeCompare(b.name));
+}
+
+function memberNames(members) {
+  return normaliseMembers(members).map((member) => member.name);
+}
+
+function membersPayload(members) {
+  const normalisedMembers = normaliseMembers(members);
+  return { members: normalisedMembers, names: normalisedMembers.map((member) => member.name) };
 }
 
 function subscriptionKey(item) {
@@ -130,7 +167,7 @@ app.get("/api/push/status", (req, res) => {
 
 app.get("/api/members", (_req, res) => {
   const state = readState();
-  res.json({ members: normaliseMembers(state.members) });
+  res.json(membersPayload(state.members));
 });
 
 app.post("/api/members", (req, res) => {
@@ -147,12 +184,21 @@ app.post("/api/members", (req, res) => {
 
   const state = readState();
   const members = normaliseMembers(state.members);
-  if (!members.some((member) => member.toLowerCase() === name.toLowerCase())) {
-    members.push(name);
-  }
-  state.members = normaliseMembers(members);
+  const existing = members.find((member) => member.name.toLowerCase() === name.toLowerCase());
+  const nextProfile = normaliseMemberProfile({
+    ...(existing || {}),
+    name,
+    grade: req.body.grade ?? existing?.grade,
+    ageGroup: req.body.ageGroup ?? req.body.age ?? existing?.ageGroup,
+    role: req.body.role ?? existing?.role,
+    active: req.body.active ?? existing?.active,
+  });
+  const nextMembers = existing
+    ? members.map((member) => (member.name.toLowerCase() === name.toLowerCase() ? nextProfile : member))
+    : [...members, nextProfile];
+  state.members = normaliseMembers(nextMembers);
   writeState(state);
-  res.json({ ok: true, members: state.members });
+  res.json({ ok: true, ...membersPayload(state.members) });
 });
 
 app.delete("/api/members", (req, res) => {
@@ -168,10 +214,10 @@ app.delete("/api/members", (req, res) => {
   }
 
   const state = readState();
-  state.members = normaliseMembers(state.members).filter((member) => member.toLowerCase() !== name.toLowerCase());
+  state.members = normaliseMembers(state.members).filter((member) => member.name.toLowerCase() !== name.toLowerCase());
   state.subscriptions = state.subscriptions.filter((item) => item.userName?.toLowerCase() !== name.toLowerCase());
   writeState(state);
-  res.json({ ok: true, members: state.members });
+  res.json({ ok: true, ...membersPayload(state.members) });
 });
 
 app.post("/api/push/subscribe", (req, res) => {

@@ -14,6 +14,9 @@ const adminTools = document.querySelector("#hubAdminTools");
 const adminStatus = document.querySelector("#hubAdminStatus");
 const memberAddForm = document.querySelector("#hubMemberAddForm");
 const memberAddName = document.querySelector("#hubMemberAddName");
+const memberAddGrade = document.querySelector("#hubMemberAddGrade");
+const memberAddAgeGroup = document.querySelector("#hubMemberAddAgeGroup");
+const memberAddRole = document.querySelector("#hubMemberAddRole");
 const memberRemoveForm = document.querySelector("#hubMemberRemoveForm");
 const memberRemoveName = document.querySelector("#hubMemberRemoveName");
 
@@ -69,9 +72,35 @@ function escapeHtml(value) {
   }[char]));
 }
 
+function normaliseMember(member) {
+  const source = typeof member === "string" ? { name: member } : member || {};
+  const name = normaliseName(source.name);
+  if (!name) return null;
+
+  return {
+    id: normaliseName(source.id) || name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, ""),
+    name,
+    grade: normaliseName(source.grade),
+    ageGroup: normaliseName(source.ageGroup || source.age),
+    role: normaliseName(source.role) || "Athlete",
+    active: source.active === false ? false : true,
+  };
+}
+
+function normaliseMemberList(nextMembers) {
+  return (Array.isArray(nextMembers) ? nextMembers : [])
+    .map(normaliseMember)
+    .filter(Boolean)
+    .sort((a, b) => a.name.localeCompare(b.name));
+}
+
+function memberNames() {
+  return members.map((member) => member.name);
+}
+
 function renderMembers() {
   if (!memberOptions) return;
-  memberOptions.innerHTML = members.map((name) => `<option value="${escapeHtml(name)}"></option>`).join("");
+  memberOptions.innerHTML = memberNames().map((name) => `<option value="${escapeHtml(name)}"></option>`).join("");
 }
 
 async function loadMembers() {
@@ -79,7 +108,7 @@ async function loadMembers() {
     const response = await fetch("/api/members", { cache: "no-store" });
     if (!response.ok) throw new Error("Member list could not be loaded.");
     const data = await response.json();
-    members = Array.isArray(data.members) ? data.members : [];
+    members = normaliseMemberList(data.members || data.names);
     renderMembers();
   } catch (error) {
     setStatus(error.message || "Member list could not be loaded.", "error");
@@ -105,7 +134,7 @@ async function getPublicKey() {
 
 function registeredName(input) {
   const userName = normaliseName(input);
-  return members.find((member) => member.toLowerCase() === userName.toLowerCase()) || "";
+  return members.find((member) => member.name.toLowerCase() === userName.toLowerCase())?.name || "";
 }
 
 async function enableHubNotifications(event) {
@@ -196,16 +225,21 @@ async function addMember(event) {
   const response = await fetch("/api/members", {
     method: "POST",
     headers: adminHeaders(),
-    body: JSON.stringify({ name }),
+    body: JSON.stringify({
+      name,
+      grade: memberAddGrade?.value || "",
+      ageGroup: memberAddAgeGroup?.value || "",
+      role: memberAddRole?.value || "Athlete",
+    }),
   });
   const data = await response.json().catch(() => ({}));
   if (!response.ok) {
     setAdminStatus(data.error || "Member could not be added.", "error");
     return;
   }
-  members = data.members || members;
+  members = normaliseMemberList(data.members || data.names || members);
   renderMembers();
-  memberAddName.value = "";
+  memberAddForm?.reset();
   setAdminStatus(`${name} added to the Hub register.`, "success");
 }
 
@@ -227,7 +261,7 @@ async function removeMember(event) {
     setAdminStatus(data.error || "Member could not be removed.", "error");
     return;
   }
-  members = data.members || members;
+  members = normaliseMemberList(data.members || data.names || members);
   renderMembers();
   memberRemoveName.value = "";
   setAdminStatus(`${name} removed from the Hub register.`, "success");

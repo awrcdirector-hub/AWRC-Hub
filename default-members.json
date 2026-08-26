@@ -1,89 +1,698 @@
 [
-  "Becky Roy",
-  "Robyn Van Dijk",
-  "Eli Kuehne",
-  "Awatea Tutaki",
-  "Ellie Hewer",
-  "Addison Jenkins",
-  "Jake Newton",
-  "Hayley Bartlett",
-  "Lily Camp",
-  "Bailey Barnett",
-  "Nicky Maxim",
-  "Lauren Davies",
-  "Lily Newton",
-  "Bryn Morgan",
-  "Achilles Paikea",
-  "Misha Young",
-  "Myiah Dudson",
-  "Caralie Hanna",
-  "Jordan Hallett",
-  "Morgan Wood",
-  "Thomas Dwyer",
-  "Logan Joubert",
-  "Quin Vivian",
-  "Ava Overton",
-  "Joseph Dudson",
-  "Ross Llaneta",
-  "Axel Dickinson",
-  "Adrian van Bussel",
-  "Allan Luff",
-  "Andrew Quirk",
-  "Anna Loftus",
-  "Bruce Osborne",
-  "Bruce Tate",
-  "Cath Cheatley",
-  "Colin Wright",
-  "Des Healey",
-  "Des Lock",
-  "Eleanor Arnst",
-  "Faith McGregor",
-  "Garth Hammond",
-  "Grader Howells",
-  "Jacs Rush",
-  "James Richardson",
-  "Jane McGimpsey",
-  "Jason Reid",
-  "Katy Newton",
-  "Lance O'Brien",
-  "Louise Nightingale",
-  "Matt Bailey",
-  "Murray Carey",
-  "Murray Stewart",
-  "Penny Richardson",
-  "Quinten King",
-  "Rachael Corcoran",
-  "Richard Brock",
-  "Sarah Kuehne",
-  "Stuart Fraser",
-  "Sue O'Leary",
-  "Thomas Monaghan",
-  "Tony Upchurch",
-  "Tracy Wigzell",
-  "Tiffany Davies",
-  "Callum Morgan",
-  "Ruby Bullock",
-  "Danya Booth",
-  "Xavier Warren",
-  "Rylee Earles",
-  "Millie Richardson",
-  "Georgia Calman",
-  "Sophia Su'a",
-  "Jacob Larsen",
-  "Zac Visser",
-  "Jake Buxton",
-  "Dempsey Schicker",
-  "Lilee Lambe",
-  "DJ Paikea",
-  "Sam Knapton",
-  "Karlon Johnson",
-  "Felix De Groot",
-  "Luca Kuehne",
-  "Milly Vivian",
-  "Salvador Mazzieri",
-  "Sophia Kerwin",
-  "Zack Newton",
-  "Milo Weber",
-  "David Strobel",
-  "Adela Slanarova"
+  {
+    "id": "achilles-paikea",
+    "name": "Achilles Paikea",
+    "grade": "Senior",
+    "ageGroup": "",
+    "role": "Athlete",
+    "active": true
+  },
+  {
+    "id": "addison-jenkins",
+    "name": "Addison Jenkins",
+    "grade": "Club",
+    "ageGroup": "",
+    "role": "Athlete",
+    "active": true
+  },
+  {
+    "id": "adela-slanarova",
+    "name": "Adela Slanarova",
+    "grade": "Intermediate",
+    "ageGroup": "",
+    "role": "Athlete",
+    "active": true
+  },
+  {
+    "id": "adrian-van-bussel",
+    "name": "Adrian van Bussel",
+    "grade": "Masters",
+    "ageGroup": "",
+    "role": "Athlete",
+    "active": true
+  },
+  {
+    "id": "allan-luff",
+    "name": "Allan Luff",
+    "grade": "Masters",
+    "ageGroup": "",
+    "role": "Athlete",
+    "active": true
+  },
+  {
+    "id": "andrew-quirk",
+    "name": "Andrew Quirk",
+    "grade": "Masters",
+    "ageGroup": "",
+    "role": "Athlete",
+    "active": true
+  },
+  {
+    "id": "anna-loftus",
+    "name": "Anna Loftus",
+    "grade": "Masters",
+    "ageGroup": "",
+    "role": "Athlete",
+    "active": true
+  },
+  {
+    "id": "ava-overton",
+    "name": "Ava Overton",
+    "grade": "Intermediate",
+    "ageGroup": "",
+    "role": "Athlete",
+    "active": true
+  },
+  {
+    "id": "awatea-tutaki",
+    "name": "Awatea Tutaki",
+    "grade": "Coxswain",
+    "ageGroup": "",
+    "role": "Coxswain",
+    "active": true
+  },
+  {
+    "id": "axel-dickinson",
+    "name": "Axel Dickinson",
+    "grade": "Senior",
+    "ageGroup": "",
+    "role": "Athlete",
+    "active": true
+  },
+  {
+    "id": "bailey-barnett",
+    "name": "Bailey Barnett",
+    "grade": "Club",
+    "ageGroup": "",
+    "role": "Athlete",
+    "active": true
+  },
+  {
+    "id": "becky-roy",
+    "name": "Becky Roy",
+    "grade": "Intermediate",
+    "ageGroup": "",
+    "role": "Athlete",
+    "active": true
+  },
+  {
+    "id": "bruce-osborne",
+    "name": "Bruce Osborne",
+    "grade": "Masters",
+    "ageGroup": "",
+    "role": "Athlete",
+    "active": true
+  },
+  {
+    "id": "bruce-tate",
+    "name": "Bruce Tate",
+    "grade": "Masters",
+    "ageGroup": "",
+    "role": "Athlete",
+    "active": true
+  },
+  {
+    "id": "bryn-morgan",
+    "name": "Bryn Morgan",
+    "grade": "Club",
+    "ageGroup": "",
+    "role": "Athlete",
+    "active": true
+  },
+  {
+    "id": "callum-morgan",
+    "name": "Callum Morgan",
+    "grade": "Intermediate",
+    "ageGroup": "",
+    "role": "Athlete",
+    "active": true
+  },
+  {
+    "id": "caralie-hanna",
+    "name": "Caralie Hanna",
+    "grade": "Club",
+    "ageGroup": "",
+    "role": "Athlete",
+    "active": true
+  },
+  {
+    "id": "cath-cheatley",
+    "name": "Cath Cheatley",
+    "grade": "Masters",
+    "ageGroup": "",
+    "role": "Athlete",
+    "active": true
+  },
+  {
+    "id": "colin-wright",
+    "name": "Colin Wright",
+    "grade": "Masters",
+    "ageGroup": "",
+    "role": "Athlete",
+    "active": true
+  },
+  {
+    "id": "danya-booth",
+    "name": "Danya Booth",
+    "grade": "Intermediate",
+    "ageGroup": "",
+    "role": "Athlete",
+    "active": true
+  },
+  {
+    "id": "david-strobel",
+    "name": "David Strobel",
+    "grade": "Intermediate",
+    "ageGroup": "",
+    "role": "Athlete",
+    "active": true
+  },
+  {
+    "id": "dempsey-schicker",
+    "name": "Dempsey Schicker",
+    "grade": "Club",
+    "ageGroup": "",
+    "role": "Athlete",
+    "active": true
+  },
+  {
+    "id": "des-healey",
+    "name": "Des Healey",
+    "grade": "Masters",
+    "ageGroup": "",
+    "role": "Athlete",
+    "active": true
+  },
+  {
+    "id": "des-lock",
+    "name": "Des Lock",
+    "grade": "Masters",
+    "ageGroup": "",
+    "role": "Athlete",
+    "active": true
+  },
+  {
+    "id": "dj-paikea",
+    "name": "DJ Paikea",
+    "grade": "Club",
+    "ageGroup": "",
+    "role": "Athlete",
+    "active": true
+  },
+  {
+    "id": "eleanor-arnst",
+    "name": "Eleanor Arnst",
+    "grade": "Masters",
+    "ageGroup": "",
+    "role": "Athlete",
+    "active": true
+  },
+  {
+    "id": "eli-kuehne",
+    "name": "Eli Kuehne",
+    "grade": "Senior",
+    "ageGroup": "",
+    "role": "Athlete",
+    "active": true
+  },
+  {
+    "id": "ellie-hewer",
+    "name": "Ellie Hewer",
+    "grade": "Intermediate",
+    "ageGroup": "",
+    "role": "Athlete",
+    "active": true
+  },
+  {
+    "id": "faith-mcgregor",
+    "name": "Faith McGregor",
+    "grade": "Masters",
+    "ageGroup": "",
+    "role": "Athlete",
+    "active": true
+  },
+  {
+    "id": "felix-de-groot",
+    "name": "Felix De Groot",
+    "grade": "Club",
+    "ageGroup": "",
+    "role": "Athlete",
+    "active": true
+  },
+  {
+    "id": "garth-hammond",
+    "name": "Garth Hammond",
+    "grade": "Masters",
+    "ageGroup": "",
+    "role": "Athlete",
+    "active": true
+  },
+  {
+    "id": "georgia-calman",
+    "name": "Georgia Calman",
+    "grade": "Intermediate",
+    "ageGroup": "",
+    "role": "Athlete",
+    "active": true
+  },
+  {
+    "id": "grader-howells",
+    "name": "Grader Howells",
+    "grade": "Masters",
+    "ageGroup": "",
+    "role": "Athlete",
+    "active": true
+  },
+  {
+    "id": "hayley-bartlett",
+    "name": "Hayley Bartlett",
+    "grade": "Coxswain",
+    "ageGroup": "",
+    "role": "Coxswain",
+    "active": true
+  },
+  {
+    "id": "jacob-larsen",
+    "name": "Jacob Larsen",
+    "grade": "Intermediate",
+    "ageGroup": "",
+    "role": "Athlete",
+    "active": true
+  },
+  {
+    "id": "jacs-rush",
+    "name": "Jacs Rush",
+    "grade": "Masters",
+    "ageGroup": "",
+    "role": "Athlete",
+    "active": true
+  },
+  {
+    "id": "jake-buxton",
+    "name": "Jake Buxton",
+    "grade": "Intermediate",
+    "ageGroup": "",
+    "role": "Athlete",
+    "active": true
+  },
+  {
+    "id": "jake-newton",
+    "name": "Jake Newton",
+    "grade": "Senior",
+    "ageGroup": "",
+    "role": "Athlete",
+    "active": true
+  },
+  {
+    "id": "james-richardson",
+    "name": "James Richardson",
+    "grade": "Masters",
+    "ageGroup": "",
+    "role": "Athlete",
+    "active": true
+  },
+  {
+    "id": "jane-mcgimpsey",
+    "name": "Jane McGimpsey",
+    "grade": "Masters",
+    "ageGroup": "",
+    "role": "Athlete",
+    "active": true
+  },
+  {
+    "id": "jason-reid",
+    "name": "Jason Reid",
+    "grade": "Masters",
+    "ageGroup": "",
+    "role": "Athlete",
+    "active": true
+  },
+  {
+    "id": "jordan-hallett",
+    "name": "Jordan Hallett",
+    "grade": "Senior",
+    "ageGroup": "",
+    "role": "Athlete",
+    "active": true
+  },
+  {
+    "id": "joseph-dudson",
+    "name": "Joseph Dudson",
+    "grade": "Club",
+    "ageGroup": "",
+    "role": "Athlete",
+    "active": true
+  },
+  {
+    "id": "karlon-johnson",
+    "name": "Karlon Johnson",
+    "grade": "Club",
+    "ageGroup": "",
+    "role": "Athlete",
+    "active": true
+  },
+  {
+    "id": "katy-newton",
+    "name": "Katy Newton",
+    "grade": "Masters",
+    "ageGroup": "",
+    "role": "Athlete",
+    "active": true
+  },
+  {
+    "id": "lance-o-brien",
+    "name": "Lance O'Brien",
+    "grade": "Masters",
+    "ageGroup": "",
+    "role": "Athlete",
+    "active": true
+  },
+  {
+    "id": "lauren-davies",
+    "name": "Lauren Davies",
+    "grade": "Coxswain",
+    "ageGroup": "",
+    "role": "Coxswain",
+    "active": true
+  },
+  {
+    "id": "lilee-lambe",
+    "name": "Lilee Lambe",
+    "grade": "Intermediate",
+    "ageGroup": "",
+    "role": "Athlete",
+    "active": true
+  },
+  {
+    "id": "lily-camp",
+    "name": "Lily Camp",
+    "grade": "Intermediate",
+    "ageGroup": "",
+    "role": "Athlete",
+    "active": true
+  },
+  {
+    "id": "lily-newton",
+    "name": "Lily Newton",
+    "grade": "Intermediate",
+    "ageGroup": "",
+    "role": "Athlete",
+    "active": true
+  },
+  {
+    "id": "logan-joubert",
+    "name": "Logan Joubert",
+    "grade": "Club",
+    "ageGroup": "",
+    "role": "Athlete",
+    "active": true
+  },
+  {
+    "id": "louise-nightingale",
+    "name": "Louise Nightingale",
+    "grade": "Masters",
+    "ageGroup": "",
+    "role": "Athlete",
+    "active": true
+  },
+  {
+    "id": "luca-kuehne",
+    "name": "Luca Kuehne",
+    "grade": "Intermediate",
+    "ageGroup": "",
+    "role": "Athlete",
+    "active": true
+  },
+  {
+    "id": "matt-bailey",
+    "name": "Matt Bailey",
+    "grade": "Masters",
+    "ageGroup": "",
+    "role": "Athlete",
+    "active": true
+  },
+  {
+    "id": "millie-richardson",
+    "name": "Millie Richardson",
+    "grade": "Club",
+    "ageGroup": "",
+    "role": "Athlete",
+    "active": true
+  },
+  {
+    "id": "milly-vivian",
+    "name": "Milly Vivian",
+    "grade": "Intermediate",
+    "ageGroup": "",
+    "role": "Athlete",
+    "active": true
+  },
+  {
+    "id": "milo-weber",
+    "name": "Milo Weber",
+    "grade": "Intermediate",
+    "ageGroup": "",
+    "role": "Athlete",
+    "active": true
+  },
+  {
+    "id": "misha-young",
+    "name": "Misha Young",
+    "grade": "Coxswain",
+    "ageGroup": "",
+    "role": "Coxswain",
+    "active": true
+  },
+  {
+    "id": "morgan-wood",
+    "name": "Morgan Wood",
+    "grade": "Coxswain",
+    "ageGroup": "",
+    "role": "Coxswain",
+    "active": true
+  },
+  {
+    "id": "murray-carey",
+    "name": "Murray Carey",
+    "grade": "Masters",
+    "ageGroup": "",
+    "role": "Athlete",
+    "active": true
+  },
+  {
+    "id": "murray-stewart",
+    "name": "Murray Stewart",
+    "grade": "Masters",
+    "ageGroup": "",
+    "role": "Athlete",
+    "active": true
+  },
+  {
+    "id": "myiah-dudson",
+    "name": "Myiah Dudson",
+    "grade": "Intermediate",
+    "ageGroup": "",
+    "role": "Athlete",
+    "active": true
+  },
+  {
+    "id": "nicky-maxim",
+    "name": "Nicky Maxim",
+    "grade": "Senior",
+    "ageGroup": "",
+    "role": "Athlete",
+    "active": true
+  },
+  {
+    "id": "penny-richardson",
+    "name": "Penny Richardson",
+    "grade": "Masters",
+    "ageGroup": "",
+    "role": "Athlete",
+    "active": true
+  },
+  {
+    "id": "quin-vivian",
+    "name": "Quin Vivian",
+    "grade": "Senior",
+    "ageGroup": "",
+    "role": "Athlete",
+    "active": true
+  },
+  {
+    "id": "quinten-king",
+    "name": "Quinten King",
+    "grade": "Masters",
+    "ageGroup": "",
+    "role": "Athlete",
+    "active": true
+  },
+  {
+    "id": "rachael-corcoran",
+    "name": "Rachael Corcoran",
+    "grade": "Masters",
+    "ageGroup": "",
+    "role": "Athlete",
+    "active": true
+  },
+  {
+    "id": "richard-brock",
+    "name": "Richard Brock",
+    "grade": "Masters",
+    "ageGroup": "",
+    "role": "Athlete",
+    "active": true
+  },
+  {
+    "id": "robyn-van-dijk",
+    "name": "Robyn Van Dijk",
+    "grade": "Club",
+    "ageGroup": "",
+    "role": "Athlete",
+    "active": true
+  },
+  {
+    "id": "ross-llaneta",
+    "name": "Ross Llaneta",
+    "grade": "Senior",
+    "ageGroup": "",
+    "role": "Athlete",
+    "active": true
+  },
+  {
+    "id": "ruby-bullock",
+    "name": "Ruby Bullock",
+    "grade": "Club",
+    "ageGroup": "",
+    "role": "Athlete",
+    "active": true
+  },
+  {
+    "id": "rylee-earles",
+    "name": "Rylee Earles",
+    "grade": "Intermediate",
+    "ageGroup": "",
+    "role": "Athlete",
+    "active": true
+  },
+  {
+    "id": "salvador-mazzieri",
+    "name": "Salvador Mazzieri",
+    "grade": "Intermediate",
+    "ageGroup": "",
+    "role": "Athlete",
+    "active": true
+  },
+  {
+    "id": "sam-knapton",
+    "name": "Sam Knapton",
+    "grade": "Club",
+    "ageGroup": "",
+    "role": "Athlete",
+    "active": true
+  },
+  {
+    "id": "sarah-kuehne",
+    "name": "Sarah Kuehne",
+    "grade": "Masters",
+    "ageGroup": "",
+    "role": "Athlete",
+    "active": true
+  },
+  {
+    "id": "sophia-kerwin",
+    "name": "Sophia Kerwin",
+    "grade": "Intermediate",
+    "ageGroup": "",
+    "role": "Athlete",
+    "active": true
+  },
+  {
+    "id": "sophia-su-a",
+    "name": "Sophia Su'a",
+    "grade": "Club",
+    "ageGroup": "",
+    "role": "Athlete",
+    "active": true
+  },
+  {
+    "id": "stuart-fraser",
+    "name": "Stuart Fraser",
+    "grade": "Masters",
+    "ageGroup": "",
+    "role": "Athlete",
+    "active": true
+  },
+  {
+    "id": "sue-o-leary",
+    "name": "Sue O'Leary",
+    "grade": "Masters",
+    "ageGroup": "",
+    "role": "Athlete",
+    "active": true
+  },
+  {
+    "id": "thomas-dwyer",
+    "name": "Thomas Dwyer",
+    "grade": "Intermediate",
+    "ageGroup": "",
+    "role": "Athlete",
+    "active": true
+  },
+  {
+    "id": "thomas-monaghan",
+    "name": "Thomas Monaghan",
+    "grade": "Masters",
+    "ageGroup": "",
+    "role": "Athlete",
+    "active": true
+  },
+  {
+    "id": "tiffany-davies",
+    "name": "Tiffany Davies",
+    "grade": "Masters",
+    "ageGroup": "",
+    "role": "Athlete",
+    "active": true
+  },
+  {
+    "id": "tony-upchurch",
+    "name": "Tony Upchurch",
+    "grade": "Masters",
+    "ageGroup": "",
+    "role": "Athlete",
+    "active": true
+  },
+  {
+    "id": "tracy-wigzell",
+    "name": "Tracy Wigzell",
+    "grade": "Masters",
+    "ageGroup": "",
+    "role": "Athlete",
+    "active": true
+  },
+  {
+    "id": "xavier-warren",
+    "name": "Xavier Warren",
+    "grade": "Club",
+    "ageGroup": "",
+    "role": "Athlete",
+    "active": true
+  },
+  {
+    "id": "zac-visser",
+    "name": "Zac Visser",
+    "grade": "Club",
+    "ageGroup": "",
+    "role": "Athlete",
+    "active": true
+  },
+  {
+    "id": "zack-newton",
+    "name": "Zack Newton",
+    "grade": "Intermediate",
+    "ageGroup": "",
+    "role": "Athlete",
+    "active": true
+  }
 ]

@@ -198,14 +198,20 @@ input {
   gap: 10px;
 }
 
+.notify-row-wrap {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
 .notify-row input,
+.notify-row select,
 .notify-row button {
   min-height: 40px;
   border-radius: 8px;
   font: inherit;
 }
 
-.notify-row input {
+.notify-row input,
+.notify-row select {
   width: 100%;
   border: 1px solid var(--line);
   padding: 0 13px;
