@@ -33,13 +33,13 @@ input {
 }
 
 .hub {
-  width: min(100%, 780px);
+  width: min(100%, 1180px);
   min-height: 100vh;
   margin: 0 auto;
   padding: clamp(30px, 6vh, 60px) 22px 38px;
   display: flex;
   flex-direction: column;
-  align-items: center;
+  align-items: stretch;
   justify-content: center;
   gap: clamp(24px, 5vh, 44px);
 }
@@ -112,6 +112,7 @@ input {
 
 .app-grid {
   width: min(100%, 610px);
+  align-self: center;
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: clamp(10px, 3vw, 28px);
@@ -119,10 +120,15 @@ input {
 }
 
 .utility-panel {
-  width: min(100%, 610px);
+  width: min(100%, 1120px);
+  align-self: center;
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: 1fr;
   gap: 10px;
+}
+
+.admin-panel[open] {
+  width: 100%;
 }
 
 .notify-panel,
