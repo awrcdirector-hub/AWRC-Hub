@@ -150,9 +150,9 @@ function birthdayItems() {
 
 function birthdayMessage(item) {
   if (item.age >= 0 && item.age <= 21) {
-    return `Happy birthday, ${item.name} - ${item.age} today`;
+    return `Happy Birthday, ${item.name} - ${item.age} today`;
   }
-  return `Happy birthday, ${item.name}`;
+  return `Happy Birthday, ${item.name}`;
 }
 
 function renderBirthdayBanner() {
