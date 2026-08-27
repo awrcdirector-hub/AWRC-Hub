@@ -1,7 +1,7 @@
 const HUB_NOTIFY_NAME_KEY = "awrc-hub-notify-name";
 
 let members = [];
-let adminPassword = "";
+let adminToken = "";
 
 const form = document.querySelector("#hubNotifyForm");
 const nameInput = document.querySelector("#hubNotifyName");
@@ -10,6 +10,10 @@ const statusText = document.querySelector("#hubNotifyStatus");
 const enableButton = document.querySelector("#hubEnableNotifications");
 const adminLogin = document.querySelector("#hubAdminLogin");
 const adminPasswordInput = document.querySelector("#hubAdminPassword");
+const adminResetEmail = document.querySelector("#hubAdminResetEmail");
+const adminResetToken = document.querySelector("#hubAdminResetToken");
+const adminResetPassword = document.querySelector("#hubAdminResetPassword");
+const adminResetPasswordButton = document.querySelector("#hubAdminResetPasswordButton");
 const adminTools = document.querySelector("#hubAdminTools");
 const adminStatus = document.querySelector("#hubAdminStatus");
 const storageStatus = document.querySelector("#hubStorageStatus");
@@ -365,20 +369,55 @@ async function enableHubNotifications(event) {
 function adminHeaders() {
   return {
     "Content-Type": "application/json",
-    "X-Admin-Password": adminPassword,
+    Authorization: `Bearer ${adminToken}`,
   };
 }
 
-function unlockAdmin(event) {
+async function unlockAdmin(event) {
   event.preventDefault();
-  adminPassword = adminPasswordInput?.value || "";
-  if (!adminPassword) {
+  const password = adminPasswordInput?.value || "";
+  if (!password) {
     setAdminStatus("Enter the admin password.", "error");
     return;
   }
+
+  const response = await fetch("/api/admin/login", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ password }),
+  });
+  const data = await response.json().catch(() => ({}));
+  if (!response.ok) {
+    setAdminStatus(data.error || "Incorrect admin password.", "error");
+    return;
+  }
+
+  adminToken = data.token || "";
+  if (adminPasswordInput) adminPasswordInput.value = "";
   adminTools.hidden = false;
   setAdminStatus("Admin tools unlocked.", "success");
   void loadStorageStatus();
+}
+
+async function resetAdminPassword() {
+  const response = await fetch("/api/admin/reset-password", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      email: adminResetEmail?.value || "",
+      resetToken: adminResetToken?.value || "",
+      nextPassword: adminResetPassword?.value || "",
+    }),
+  });
+  const data = await response.json().catch(() => ({}));
+  if (!response.ok) {
+    setAdminStatus(data.error || "Password could not be reset.", "error");
+    return;
+  }
+
+  if (adminResetToken) adminResetToken.value = "";
+  if (adminResetPassword) adminResetPassword.value = "";
+  setAdminStatus("Password reset. Sign in with the new password.", "success");
 }
 
 async function loadStorageStatus() {
@@ -516,6 +555,7 @@ form?.addEventListener("submit", enableHubNotifications);
 nameInput?.addEventListener("input", syncEnabledButtonToName);
 nameInput?.addEventListener("change", syncEnabledButtonToName);
 adminLogin?.addEventListener("submit", unlockAdmin);
+adminResetPasswordButton?.addEventListener("click", resetAdminPassword);
 memberAddForm?.addEventListener("submit", addMember);
 memberRemoveForm?.addEventListener("submit", removeMember);
 rosterSearch?.addEventListener("input", renderRoster);

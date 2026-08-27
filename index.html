@@ -99,6 +99,15 @@
               <input id="hubAdminPassword" type="password" inputmode="numeric" autocomplete="current-password" placeholder="Admin password" />
               <button type="submit">Unlock</button>
             </div>
+            <details class="forgot-password">
+              <summary>Forgot password?</summary>
+              <div class="notify-row notify-row-wrap">
+                <input id="hubAdminResetEmail" type="email" value="awrcdirector@gmail.com" aria-label="Recovery email" />
+                <input id="hubAdminResetToken" type="password" autocomplete="off" placeholder="Reset token" aria-label="Reset token" />
+                <input id="hubAdminResetPassword" type="password" autocomplete="new-password" placeholder="New password" aria-label="New password" />
+                <button id="hubAdminResetPasswordButton" type="button">Reset</button>
+              </div>
+            </details>
           </form>
           <div class="admin-tools" id="hubAdminTools" hidden>
             <div class="storage-status" id="hubStorageStatus" role="status">Checking Hub storage...</div>

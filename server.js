@@ -1,5 +1,5 @@
 const express = require("express");
-const { randomUUID } = require("crypto");
+const { createHmac, pbkdf2Sync, randomBytes, randomUUID, timingSafeEqual } = require("crypto");
 const fs = require("fs");
 const path = require("path");
 const webPush = require("web-push");
@@ -15,7 +15,8 @@ const vapidPublicKey = process.env.VAPID_PUBLIC_KEY || "";
 const vapidPrivateKey = process.env.VAPID_PRIVATE_KEY || "";
 const vapidSubject = process.env.VAPID_SUBJECT || "mailto:admin@awrc.local";
 const notifySecret = process.env.HUB_NOTIFY_SECRET || "";
-const adminPassword = process.env.HUB_ADMIN_PASSWORD || "2852";
+const adminRecoveryEmail = "awrcdirector@gmail.com";
+const adminCredentialFile = process.env.ADMIN_CREDENTIAL_FILE || "/var/data/hub-admin-credentials.json";
 const defaultMembers = require("./default-members.json");
 
 const allowedOrigins = new Set([
@@ -64,6 +65,71 @@ app.use(
     extensions: ["html"],
   }),
 );
+
+function requiredEnv(name) {
+  const value = (process.env[name] || "").trim();
+  if (!value) throw new Error(`${name} is not configured.`);
+  return value;
+}
+
+function hashPassword(password, salt = randomBytes(16).toString("hex")) {
+  return {
+    hash: pbkdf2Sync(password, salt, 210000, 32, "sha256").toString("hex"),
+    salt,
+  };
+}
+
+function safeEqual(left, right) {
+  const leftBuffer = Buffer.from(String(left || ""));
+  const rightBuffer = Buffer.from(String(right || ""));
+  return leftBuffer.length === rightBuffer.length && timingSafeEqual(leftBuffer, rightBuffer);
+}
+
+function readAdminCredentials() {
+  try {
+    const parsed = JSON.parse(fs.readFileSync(adminCredentialFile, "utf8"));
+    if (parsed.passwordHash && parsed.passwordSalt) return parsed;
+  } catch (_error) {}
+
+  return {
+    passwordHash: requiredEnv("ADMIN_PASSWORD_HASH"),
+    passwordSalt: requiredEnv("ADMIN_PASSWORD_SALT"),
+  };
+}
+
+function verifyAdminPassword(password) {
+  const credential = readAdminCredentials();
+  const { hash } = hashPassword(password, credential.passwordSalt);
+  return safeEqual(hash, credential.passwordHash);
+}
+
+function issueAdminToken() {
+  const expires = Date.now() + 1000 * 60 * 60 * 12;
+  const payload = `${expires}`;
+  const signature = createHmac("sha256", requiredEnv("ADMIN_SESSION_SECRET")).update(payload).digest("hex");
+  return `${payload}.${signature}`;
+}
+
+function adminAuthorised(req) {
+  const header = req.headers.authorization || "";
+  const token = header.startsWith("Bearer ") ? header.slice("Bearer ".length) : "";
+  const [expires, signature] = token.split(".");
+  const expiresAt = Number(expires);
+  if (!expires || !signature || !Number.isFinite(expiresAt) || expiresAt < Date.now()) return false;
+  const expected = createHmac("sha256", requiredEnv("ADMIN_SESSION_SECRET")).update(expires).digest("hex");
+  return safeEqual(signature, expected);
+}
+
+function resetAdminPassword(resetToken, nextPassword) {
+  if (!safeEqual(resetToken, requiredEnv("ADMIN_RESET_TOKEN"))) return false;
+  if (!String(nextPassword || "").trim() || String(nextPassword).trim().length < 4) {
+    throw new Error("Password must be at least 4 characters.");
+  }
+  const { hash, salt } = hashPassword(String(nextPassword).trim());
+  fs.mkdirSync(path.dirname(adminCredentialFile), { recursive: true });
+  fs.writeFileSync(adminCredentialFile, JSON.stringify({ passwordHash: hash, passwordSalt: salt }, null, 2));
+  return true;
+}
 
 function readState() {
   try {
@@ -229,10 +295,6 @@ function authorised(req) {
   return bearer === notifySecret || req.headers["x-hub-notify-secret"] === notifySecret;
 }
 
-function adminAuthorised(req) {
-  return req.headers["x-admin-password"] === adminPassword;
-}
-
 app.get("/api/push/public-key", (_req, res) => {
   res.json({
     publicKey: vapidPublicKey,
@@ -268,6 +330,31 @@ app.get("/api/members", (_req, res) => {
 
 app.get("/api/storage/status", (_req, res) => {
   res.json(stateStorageStatus());
+});
+
+app.post("/api/admin/login", (req, res) => {
+  if (!verifyAdminPassword(req.body.password || "")) {
+    res.status(401).json({ error: "Incorrect admin password." });
+    return;
+  }
+  res.json({ token: issueAdminToken() });
+});
+
+app.post("/api/admin/reset-password", (req, res) => {
+  if (normaliseName(req.body.email).toLowerCase() !== adminRecoveryEmail) {
+    res.status(403).json({ error: `Password recovery is only available for ${adminRecoveryEmail}.` });
+    return;
+  }
+
+  try {
+    if (!resetAdminPassword(req.body.resetToken || "", req.body.nextPassword || "")) {
+      res.status(401).json({ error: "Reset token is incorrect." });
+      return;
+    }
+    res.json({ ok: true });
+  } catch (error) {
+    res.status(400).json({ error: error.message || "Password could not be reset." });
+  }
 });
 
 app.post("/api/members", (req, res) => {
