@@ -16,6 +16,7 @@ const storageStatus = document.querySelector("#hubStorageStatus");
 const memberAddForm = document.querySelector("#hubMemberAddForm");
 const memberAddName = document.querySelector("#hubMemberAddName");
 const memberAddGrade = document.querySelector("#hubMemberAddGrade");
+const memberAddGender = document.querySelector("#hubMemberAddGender");
 const memberAddDateOfBirth = document.querySelector("#hubMemberAddDateOfBirth");
 const memberAddRole = document.querySelector("#hubMemberAddRole");
 const memberRemoveForm = document.querySelector("#hubMemberRemoveForm");
@@ -91,6 +92,7 @@ function normaliseMember(member) {
     id: normaliseName(source.id) || name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, ""),
     name,
     grade: normaliseName(source.grade),
+    gender: normaliseName(source.gender),
     ageGroup: normaliseName(source.ageGroup || source.age),
     dateOfBirth: normaliseName(source.dateOfBirth || source.dob),
     roles,
@@ -178,6 +180,7 @@ function renderBirthdayBanner() {
 function memberGaps(member) {
   return [
     member.grade ? "" : "grade",
+    member.gender ? "" : "gender",
     member.dateOfBirth ? "" : "DOB",
     member.roles?.length ? "" : "role",
   ].filter(Boolean);
@@ -190,6 +193,13 @@ function rosterRow(member) {
     <tr data-member-id="${escapeHtml(member.id)}">
       <td><input data-field="name" value="${escapeHtml(member.name)}" /></td>
       <td><input data-field="grade" value="${escapeHtml(member.grade)}" placeholder="Ability grade" /></td>
+      <td>
+        <select data-field="gender">
+          ${["", "Female", "Male", "Other"].map((gender) => (
+            `<option value="${escapeHtml(gender)}"${member.gender === gender ? " selected" : ""}>${escapeHtml(gender || "Select")}</option>`
+          )).join("")}
+        </select>
+      </td>
       <td><input data-field="dateOfBirth" type="date" value="${escapeHtml(member.dateOfBirth)}" /></td>
       <td><span class="age-group">${escapeHtml(member.ageGroup || "Set DOB")}</span></td>
       <td>
@@ -218,7 +228,7 @@ function renderRoster() {
   if (!rosterBody) return;
   const search = normaliseName(rosterSearch?.value).toLowerCase();
   const visibleMembers = search
-    ? members.filter((member) => [member.name, member.grade, member.ageGroup, member.role].join(" ").toLowerCase().includes(search))
+    ? members.filter((member) => [member.name, member.grade, member.gender, member.ageGroup, member.role].join(" ").toLowerCase().includes(search))
     : members;
 
   rosterBody.innerHTML = visibleMembers.map(rosterRow).join("");
@@ -400,6 +410,7 @@ async function addMember(event) {
     body: JSON.stringify({
       name,
       grade: memberAddGrade?.value || "",
+      gender: memberAddGender?.value || "",
       dateOfBirth: memberAddDateOfBirth?.value || "",
       roles: [...(memberAddRole?.querySelectorAll("input:checked") || [])].map((option) => option.value),
     }),
@@ -462,6 +473,7 @@ async function saveRosterRow(button) {
       id: existing?.id || originalId,
       name,
       grade: fields.grade || "",
+      gender: fields.gender || "",
       dateOfBirth: fields.dateOfBirth || "",
       roles: fields.roles,
       active: fields.active !== "false",
