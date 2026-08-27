@@ -21,6 +21,7 @@ const memberRemoveForm = document.querySelector("#hubMemberRemoveForm");
 const memberRemoveName = document.querySelector("#hubMemberRemoveName");
 const rosterBody = document.querySelector("#hubRosterBody");
 const rosterSearch = document.querySelector("#hubRosterSearch");
+const birthdayBanner = document.querySelector("#birthdayBanner");
 const roleOptions = ["Athlete", "Coach", "Admin", "Coxswain"];
 
 function savedNotificationName() {
@@ -116,7 +117,55 @@ function memberNames() {
 function renderMembers() {
   if (!memberOptions) return;
   memberOptions.innerHTML = memberNames().map((name) => `<option value="${escapeHtml(name)}"></option>`).join("");
+  renderBirthdayBanner();
   renderRoster();
+}
+
+function dateParts(dateText) {
+  const match = String(dateText || "").match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  if (!match) return null;
+  return {
+    year: Number(match[1]),
+    month: Number(match[2]),
+    day: Number(match[3]),
+  };
+}
+
+function birthdayItems() {
+  const today = new Date();
+  const month = today.getMonth() + 1;
+  const day = today.getDate();
+  const year = today.getFullYear();
+
+  return members
+    .filter((member) => member.active !== false)
+    .map((member) => ({ member, dob: dateParts(member.dateOfBirth) }))
+    .filter(({ dob }) => dob && dob.month === month && dob.day === day)
+    .map(({ member, dob }) => ({
+      name: member.name,
+      age: year - dob.year,
+    }))
+    .sort((a, b) => a.name.localeCompare(b.name));
+}
+
+function birthdayMessage(item) {
+  if (item.age >= 0 && item.age <= 21) {
+    return `Happy birthday, ${item.name} - ${item.age} today`;
+  }
+  return `Happy birthday, ${item.name}`;
+}
+
+function renderBirthdayBanner() {
+  if (!birthdayBanner) return;
+  const birthdays = birthdayItems();
+  if (!birthdays.length) {
+    birthdayBanner.hidden = true;
+    birthdayBanner.innerHTML = "";
+    return;
+  }
+
+  birthdayBanner.hidden = false;
+  birthdayBanner.innerHTML = birthdays.map((item) => `<p>${escapeHtml(birthdayMessage(item))}</p>`).join("");
 }
 
 function memberGaps(member) {
