@@ -13,5 +13,5 @@ const hash = pbkdf2Sync(password, salt, 210000, 32, "sha256").toString("hex");
 console.log(`ADMIN_PASSWORD_HASH=${hash}`);
 console.log(`ADMIN_PASSWORD_SALT=${salt}`);
 console.log(`ADMIN_SESSION_SECRET=${randomBytes(32).toString("hex")}`);
-console.log(`ADMIN_RESET_TOKEN=${randomBytes(24).toString("hex")}`);
+
 console.log("ADMIN_RECOVERY_EMAIL=awrcdirector@gmail.com");

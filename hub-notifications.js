@@ -11,9 +11,7 @@ const enableButton = document.querySelector("#hubEnableNotifications");
 const adminLogin = document.querySelector("#hubAdminLogin");
 const adminPasswordInput = document.querySelector("#hubAdminPassword");
 const adminResetEmail = document.querySelector("#hubAdminResetEmail");
-const adminResetToken = document.querySelector("#hubAdminResetToken");
-const adminResetPassword = document.querySelector("#hubAdminResetPassword");
-const adminResetPasswordButton = document.querySelector("#hubAdminResetPasswordButton");
+const adminForgotPasswordButton = document.querySelector("#hubAdminForgotPasswordButton");
 const adminTools = document.querySelector("#hubAdminTools");
 const adminStatus = document.querySelector("#hubAdminStatus");
 const storageStatus = document.querySelector("#hubStorageStatus");
@@ -399,25 +397,21 @@ async function unlockAdmin(event) {
   void loadStorageStatus();
 }
 
-async function resetAdminPassword() {
-  const response = await fetch("/api/admin/reset-password", {
+async function sendPasswordResetEmail() {
+  const response = await fetch("/api/admin/forgot-password", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
       email: adminResetEmail?.value || "",
-      resetToken: adminResetToken?.value || "",
-      nextPassword: adminResetPassword?.value || "",
     }),
   });
   const data = await response.json().catch(() => ({}));
   if (!response.ok) {
-    setAdminStatus(data.error || "Password could not be reset.", "error");
+    setAdminStatus(data.error || "Reset email could not be sent.", "error");
     return;
   }
 
-  if (adminResetToken) adminResetToken.value = "";
-  if (adminResetPassword) adminResetPassword.value = "";
-  setAdminStatus("Password reset. Sign in with the new password.", "success");
+  setAdminStatus(data.message || "Password reset email sent.", "success");
 }
 
 async function loadStorageStatus() {
@@ -555,7 +549,7 @@ form?.addEventListener("submit", enableHubNotifications);
 nameInput?.addEventListener("input", syncEnabledButtonToName);
 nameInput?.addEventListener("change", syncEnabledButtonToName);
 adminLogin?.addEventListener("submit", unlockAdmin);
-adminResetPasswordButton?.addEventListener("click", resetAdminPassword);
+adminForgotPasswordButton?.addEventListener("click", sendPasswordResetEmail);
 memberAddForm?.addEventListener("submit", addMember);
 memberRemoveForm?.addEventListener("submit", removeMember);
 rosterSearch?.addEventListener("input", renderRoster);

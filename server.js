@@ -17,6 +17,7 @@ const vapidSubject = process.env.VAPID_SUBJECT || "mailto:admin@awrc.local";
 const notifySecret = process.env.HUB_NOTIFY_SECRET || "";
 const adminRecoveryEmail = "awrcdirector@gmail.com";
 const adminCredentialFile = process.env.ADMIN_CREDENTIAL_FILE || "/var/data/hub-admin-credentials.json";
+const adminResetFile = process.env.ADMIN_RESET_FILE || "/var/data/hub-admin-reset.json";
 const defaultMembers = require("./default-members.json");
 
 const allowedOrigins = new Set([
@@ -120,14 +121,63 @@ function adminAuthorised(req) {
   return safeEqual(signature, expected);
 }
 
-function resetAdminPassword(resetToken, nextPassword) {
-  if (!safeEqual(resetToken, requiredEnv("ADMIN_RESET_TOKEN"))) return false;
+function resetTokenHash(token) {
+  return createHmac("sha256", requiredEnv("ADMIN_SESSION_SECRET")).update(token).digest("hex");
+}
+
+function createPasswordResetLink() {
+  const token = randomBytes(32).toString("hex");
+  const expiresAt = Date.now() + 1000 * 60 * 30;
+  fs.mkdirSync(path.dirname(adminResetFile), { recursive: true });
+  fs.writeFileSync(adminResetFile, JSON.stringify({ tokenHash: resetTokenHash(token), expiresAt }, null, 2));
+  return `${hubBaseUrl}/reset-password.html?token=${encodeURIComponent(token)}`;
+}
+
+async function sendPasswordResetEmail(link) {
+  const apiKey = (process.env.RESEND_API_KEY || "").trim();
+  const from = (process.env.PASSWORD_RESET_FROM_EMAIL || "").trim();
+  if (!apiKey || !from) {
+    throw new Error("Password reset email is not configured. Add RESEND_API_KEY and PASSWORD_RESET_FROM_EMAIL in Render.");
+  }
+
+  const response = await fetch("https://api.resend.com/emails", {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${apiKey}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      from,
+      to: adminRecoveryEmail,
+      subject: "AWRC Hub password reset",
+      html: `<p>Use this secure link to reset the AWRC Hub admin password:</p><p><a href="${link}">Reset password</a></p><p>This link expires in 30 minutes.</p>`,
+      text: `Use this secure link to reset the AWRC Hub admin password: ${link}\n\nThis link expires in 30 minutes.`,
+    }),
+  });
+
+  if (!response.ok) {
+    throw new Error(`Email service returned ${response.status}.`);
+  }
+}
+
+function resetAdminPassword(token, nextPassword) {
+  let reset;
+  try {
+    reset = JSON.parse(fs.readFileSync(adminResetFile, "utf8"));
+  } catch (_error) {
+    return false;
+  }
+  if (!reset?.tokenHash || !reset?.expiresAt || Date.now() > Number(reset.expiresAt)) return false;
+  if (!safeEqual(resetTokenHash(token), reset.tokenHash)) return false;
   if (!String(nextPassword || "").trim() || String(nextPassword).trim().length < 4) {
     throw new Error("Password must be at least 4 characters.");
   }
   const { hash, salt } = hashPassword(String(nextPassword).trim());
   fs.mkdirSync(path.dirname(adminCredentialFile), { recursive: true });
   fs.writeFileSync(adminCredentialFile, JSON.stringify({ passwordHash: hash, passwordSalt: salt }, null, 2));
+  try {
+    fs.rmSync(adminResetFile, { force: true });
+  } catch (_error) {}
   return true;
 }
 
@@ -340,15 +390,24 @@ app.post("/api/admin/login", (req, res) => {
   res.json({ token: issueAdminToken() });
 });
 
-app.post("/api/admin/reset-password", (req, res) => {
+app.post("/api/admin/forgot-password", async (req, res) => {
   if (normaliseName(req.body.email).toLowerCase() !== adminRecoveryEmail) {
     res.status(403).json({ error: `Password recovery is only available for ${adminRecoveryEmail}.` });
     return;
   }
 
   try {
-    if (!resetAdminPassword(req.body.resetToken || "", req.body.nextPassword || "")) {
-      res.status(401).json({ error: "Reset token is incorrect." });
+    await sendPasswordResetEmail(createPasswordResetLink());
+    res.json({ ok: true, message: `Password reset email sent to ${adminRecoveryEmail}.` });
+  } catch (error) {
+    res.status(500).json({ error: error.message || "Password reset email could not be sent." });
+  }
+});
+
+app.post("/api/admin/reset-password", (req, res) => {
+  try {
+    if (!resetAdminPassword(req.body.token || "", req.body.nextPassword || "")) {
+      res.status(401).json({ error: "Reset link is invalid or expired." });
       return;
     }
     res.json({ ok: true });
