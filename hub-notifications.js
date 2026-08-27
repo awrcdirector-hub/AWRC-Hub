@@ -159,9 +159,9 @@ function birthdayItems() {
 
 function birthdayMessage(item) {
   if (item.age >= 0 && item.age <= 21) {
-    return `Happy Birthday, ${item.name} - ${item.age} today`;
+    return `Happy Birthday, ${item.name} - ${item.age} today!`;
   }
-  return `Happy Birthday, ${item.name}`;
+  return `Happy Birthday, ${item.name}!`;
 }
 
 function renderBirthdayBanner() {
@@ -174,7 +174,7 @@ function renderBirthdayBanner() {
   }
 
   birthdayBanner.hidden = false;
-  birthdayBanner.innerHTML = birthdays.map((item) => `<p>${escapeHtml(birthdayMessage(item))}</p>`).join("");
+  birthdayBanner.innerHTML = birthdays.map((item) => `<p><span aria-hidden="true">🎉</span> ${escapeHtml(birthdayMessage(item))} <span aria-hidden="true">🎉</span></p>`).join("");
 }
 
 function memberGaps(member) {
