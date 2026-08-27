@@ -12,6 +12,7 @@ const adminLogin = document.querySelector("#hubAdminLogin");
 const adminPasswordInput = document.querySelector("#hubAdminPassword");
 const adminTools = document.querySelector("#hubAdminTools");
 const adminStatus = document.querySelector("#hubAdminStatus");
+const storageStatus = document.querySelector("#hubStorageStatus");
 const memberAddForm = document.querySelector("#hubMemberAddForm");
 const memberAddName = document.querySelector("#hubMemberAddName");
 const memberAddGrade = document.querySelector("#hubMemberAddGrade");
@@ -58,6 +59,12 @@ function setAdminStatus(message, kind = "neutral") {
   if (!adminStatus) return;
   adminStatus.textContent = message;
   adminStatus.dataset.kind = kind;
+}
+
+function setStorageStatus(message, kind = "neutral") {
+  if (!storageStatus) return;
+  storageStatus.textContent = message;
+  storageStatus.dataset.kind = kind;
 }
 
 function normaliseName(name) {
@@ -361,6 +368,22 @@ function unlockAdmin(event) {
   }
   adminTools.hidden = false;
   setAdminStatus("Admin tools unlocked.", "success");
+  void loadStorageStatus();
+}
+
+async function loadStorageStatus() {
+  try {
+    const response = await fetch("/api/storage/status", { cache: "no-store" });
+    if (!response.ok) throw new Error("Storage status could not be checked.");
+    const status = await response.json();
+    if (status.usingPersistentDisk) {
+      setStorageStatus(`Persistent storage active. ${status.memberCount} profiles saved.`, "success");
+      return;
+    }
+    setStorageStatus("Profile changes are not using persistent storage yet. Attach a Render disk at /var/data before relying on updates.", "error");
+  } catch (error) {
+    setStorageStatus(error.message || "Storage status could not be checked.", "error");
+  }
 }
 
 async function addMember(event) {

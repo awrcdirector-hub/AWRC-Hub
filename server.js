@@ -83,6 +83,17 @@ function writeState(state) {
   fs.writeFileSync(stateFile, `${JSON.stringify(state, null, 2)}\n`);
 }
 
+function stateStorageStatus() {
+  const usingPersistentDisk = stateFile.startsWith("/var/data/");
+  return {
+    stateFile,
+    usingPersistentDisk,
+    persistentMountExists: fs.existsSync("/var/data"),
+    memberCount: readState().members.length,
+    subscriptionCount: readState().subscriptions.length,
+  };
+}
+
 function normaliseName(name) {
   return String(name || "").trim().replace(/\s+/g, " ");
 }
@@ -252,6 +263,10 @@ app.get("/api/push/status", (req, res) => {
 app.get("/api/members", (_req, res) => {
   const state = readState();
   res.json(membersPayload(state.members));
+});
+
+app.get("/api/storage/status", (_req, res) => {
+  res.json(stateStorageStatus());
 });
 
 app.post("/api/members", (req, res) => {

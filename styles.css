@@ -280,6 +280,28 @@ input {
   display: none;
 }
 
+.storage-status {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 10px 13px;
+  color: var(--muted);
+  background: #ffffff;
+  font-size: 0.84rem;
+  font-weight: 850;
+}
+
+.storage-status[data-kind="success"] {
+  border-color: rgba(17, 95, 70, 0.24);
+  color: var(--green);
+  background: rgba(17, 95, 70, 0.06);
+}
+
+.storage-status[data-kind="error"] {
+  border-color: rgba(180, 61, 48, 0.32);
+  color: var(--red);
+  background: rgba(180, 61, 48, 0.06);
+}
+
 .notify-row button:disabled {
   cursor: wait;
   opacity: 0.68;

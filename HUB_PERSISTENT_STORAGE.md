@@ -9,3 +9,5 @@ The app will then automatically store Hub member data and phone notification reg
 `/var/data/hub-notifications-state.json`
 
 Without a persistent disk, redeploying the Hub can clear phone notification registrations and members may need to enable notifications again.
+
+After deploying, unlock Hub admin and check the storage status message. It must say persistent storage is active before profile edits like date of birth can be trusted to survive future app updates.
