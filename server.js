@@ -382,6 +382,31 @@ app.get("/api/storage/status", (_req, res) => {
   res.json(stateStorageStatus());
 });
 
+app.get("/api/admin/notification-status", (req, res) => {
+  if (!adminAuthorised(req)) {
+    res.status(401).json({ error: "Admin login required" });
+    return;
+  }
+
+  const state = readState();
+  const enabledUsers = [...new Set(state.subscriptions.map((item) => normaliseName(item.userName)).filter(Boolean))]
+    .sort((a, b) => a.localeCompare(b));
+  const enabledSet = new Set(enabledUsers.map((name) => name.toLowerCase()));
+  const activeMembers = normaliseMembers(state.members).filter((member) => member.active !== false);
+  const missingUsers = activeMembers
+    .filter((member) => !enabledSet.has(member.name.toLowerCase()))
+    .map((member) => member.name);
+
+  res.json({
+    enabledUsers,
+    missingUsers,
+    enabledCount: enabledUsers.length,
+    missingCount: missingUsers.length,
+    activeMemberCount: activeMembers.length,
+    subscriptionCount: state.subscriptions.length,
+  });
+});
+
 app.post("/api/admin/login", (req, res) => {
   if (!verifyAdminPassword(req.body.password || "")) {
     res.status(401).json({ error: "Incorrect admin password." });

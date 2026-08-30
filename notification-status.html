@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>AWRC Hub Notification Status</title>
+  <link rel="stylesheet" href="/styles.css" />
+</head>
+<body>
+  <main class="shell">
+    <section class="hero">
+      <p class="eyebrow">AWRC HUB</p>
+      <h1>Notification Status</h1>
+    </section>
+
+    <section class="admin-panel" open>
+      <form class="admin-login" id="statusLogin">
+        <label for="statusPassword">Admin password</label>
+        <div class="notify-row">
+          <input id="statusPassword" type="password" autocomplete="current-password" />
+          <button type="submit">View list</button>
+        </div>
+        <p class="notify-status" id="statusMessage" role="status"></p>
+      </form>
+    </section>
+
+    <section class="admin-tools status-grid" id="statusGrid" hidden>
+      <article class="app-card">
+        <p class="eyebrow">Enabled</p>
+        <h2 id="enabledCount">0</h2>
+        <div class="member-list" id="enabledList"></div>
+      </article>
+      <article class="app-card">
+        <p class="eyebrow">Chase Up</p>
+        <h2 id="missingCount">0</h2>
+        <div class="member-list" id="missingList"></div>
+      </article>
+    </section>
+  </main>
+
+  <script>
+    const form = document.querySelector("#statusLogin");
+    const password = document.querySelector("#statusPassword");
+    const message = document.querySelector("#statusMessage");
+    const grid = document.querySelector("#statusGrid");
+    const enabledCount = document.querySelector("#enabledCount");
+    const missingCount = document.querySelector("#missingCount");
+    const enabledList = document.querySelector("#enabledList");
+    const missingList = document.querySelector("#missingList");
+
+    function setMessage(text, kind = "neutral") {
+      message.textContent = text;
+      message.dataset.kind = kind;
+    }
+
+    function listHtml(names) {
+      if (!names.length) return '<p class="notify-status">No names to show.</p>';
+      return names.map((name) => `<span class="member-pill">${name}</span>`).join("");
+    }
+
+    form?.addEventListener("submit", async (event) => {
+      event.preventDefault();
+      setMessage("Checking notifications...");
+      const login = await fetch("/api/admin/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ password: password.value }),
+      });
+      const loginData = await login.json().catch(() => ({}));
+      if (!login.ok || !loginData.token) {
+        setMessage(loginData.error || "Incorrect admin password.", "error");
+        return;
+      }
+
+      const response = await fetch("/api/admin/notification-status", {
+        headers: { Authorization: `Bearer ${loginData.token}` },
+      });
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok) {
+        setMessage(data.error || "Notification status could not be loaded.", "error");
+        return;
+      }
+
+      enabledCount.textContent = `${data.enabledCount || 0} enabled`;
+      missingCount.textContent = `${data.missingCount || 0} missing`;
+      enabledList.innerHTML = listHtml(data.enabledUsers || []);
+      missingList.innerHTML = listHtml(data.missingUsers || []);
+      grid.hidden = false;
+      setMessage(`${data.subscriptionCount || 0} registered devices across ${data.enabledCount || 0} members.`, "success");
+    });
+  </script>
+</body>
+</html>
