@@ -374,6 +374,7 @@ app.get("/api/push/status", (req, res) => {
 });
 
 app.get("/api/members", (_req, res) => {
+  res.setHeader("Cache-Control", "no-store, max-age=0");
   const state = readState();
   res.json(membersPayload(state.members));
 });
